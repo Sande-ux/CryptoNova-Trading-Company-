@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoNova | Decentralized Asset Exchange</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .price-flash-up {
+            animation: flashGreen 0.8s ease-out;
+        }
+        .price-flash-down {
+            animation: flashRed 0.8s ease-out;
+        }
+        @keyframes flashGreen {
+            0% { color: #34d399; text-shadow: 0 0 8px rgba(52, 211, 153, 0.5); }
+            100% { color: inherit; text-shadow: none; }
+        }
+        @keyframes flashRed {
+            0% { color: #f87171; text-shadow: 0 0 8px rgba(248, 113, 113, 0.5); }
+            100% { color: inherit; text-shadow: none; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight text-white">Crypto<span class="text-indigo-400">Nova</span></span>
+                    <span class="hidden sm:inline-block ml-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">10-Asset Curated</span>
+                </div>
+            </div>
+
+            <!-- Live Market Status Pill -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-xs text-slate-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Live Feed Active</span>
+                <span class="text-slate-600">|</span>
+                <span class="font-mono text-slate-300" id="header-btc-ticker">BTC $92,450.00</span>
+            </div>
+
+            <!-- User Auth / Wallet Quick Actions -->
+            <div id="nav-auth-section" class="flex items-center gap-3">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Account Summary Banner (Visible when logged in, or prompt when logged out) -->
+        <section id="account-banner" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl">
+            <!-- Populated dynamically -->
+        </section>
+
+        <!-- Main Workspace Grid: Market Table (Left 8 cols) + Trade Panel (Right 4 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Left Column: Curated 10 Coins & Portfolio/History Tabs -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- 10 Curated Cryptocurrencies Card -->
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-xl">
+                    <div class="p-5 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-indigo-400"></i>
+                                Curated Market (10 Open-Source Assets)
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Select any asset below to load into the instant trading terminal.</p>
+                        </div>
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="coin-search" placeholder="Filter 10 coins..." 
+                                class="w-full sm:w-48 pl-9 pr-3 py-1.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Responsive Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-900/40">
+                                    <th class="py-3.5 pl-5 pr-3">Asset</th>
+                                    <th class="py-3.5 px-3 text-right">Price (USD)</th>
+                                    <th class="py-3.5 px-3 text-right">24h Change</th>
+                                    <th class="py-3.5 px-3 text-right hidden sm:table-cell">Market Cap</th>
+                                    <th class="py-3.5 px-3 text-center hidden md:table-cell">7D Trend</th>
+                                    <th class="py-3.5 pl-3 pr-5 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coins-table-body" class="divide-y divide-slate-800/50 text-sm">
+                                <!-- 10 Coins rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Portfolio Holdings & Transaction History Tabs -->
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-xl">
+                    <div class="flex border-b border-slate-800/80 px-5 pt-3 gap-6">
+                        <button id="tab-btn-portfolio" onclick="switchBottomTab('portfolio')" 
+                            class="pb-3 text-sm font-medium border-b-2 border-indigo-500 text-white transition flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i>
+                            My Portfolio Holdings
+                        </button>
+                        <button id="tab-btn-history" onclick="switchBottomTab('history')" 
+                            class="pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+                            <i data-lucide="history" class="w-4 h-4"></i>
+                            Transaction History
+                            <span id="tx-count-badge" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Portfolio Tab Content -->
+                    <div id="tab-content-portfolio" class="p-5">
+                        <div id="portfolio-list">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Transaction History Tab Content -->
+                    <div id="tab-content-history" class="hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-800/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-900/40">
+                                        <th class="py-3 pl-5 pr-3">Type</th>
+                                        <th class="py-3 px-3">Details</th>
+                                        <th class="py-3 px-3 text-right">Amount / Value</th>
+                                        <th class="py-3 pl-3 pr-5 text-right">Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tx-history-body" class="divide-y divide-slate-800/50 text-sm">
+                                    <!-- Transactions rendered here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Instant Buy / Sell Terminal -->
+            <div class="lg:col-span-4 space-y-6 sticky top-22">
+                <div class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-700/60">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="font-semibold text-white flex items-center gap-2">
+                            <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-400"></i>
+                            Spot Trade
+                        </h3>
+                        <span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium">0% Fee Promo</span>
+                    </div>
+
+                    <!-- Buy / Sell Toggle -->
+                    <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
+                        <button id="trade-mode-buy" onclick="setTradeMode('BUY')" 
+                            class="py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white shadow transition">
+                            Buy
+                        </button>
+                        <button id="trade-mode-sell" onclick="setTradeMode('SELL')" 
+                            class="py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition">
+                            Sell
+                        </button>
+                    </div>
+
+                    <!-- Selected Coin Selector -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Select Asset (10 Available)</label>
+                            <div class="relative">
+                                <select id="trade-coin-select" onchange="handleCoinSelectChange(this.value)"
+                                    class="w-full appearance-none bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                                    <!-- Options populated via JS -->
+                                </select>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                            </div>
+                        </div>
+
+                        <!-- Current Market Price Display -->
+                        <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Market Price</span>
+                            <span id="trade-live-price" class="font-mono font-semibold text-white text-sm">$0.00</span>
+                        </div>
+
+                        <!-- Amount Input (USD) -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <label class="text-slate-400 font-medium" id="trade-input-label">Amount (USD)</label>
+                                <button type="button" onclick="fillMaxTradeAmount()" class="text-indigo-400 hover:text-indigo-300 font-medium">
+                                    Available: <span id="trade-available-balance" class="font-mono">$0.00</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-sm">$</span>
+                                <input type="number" id="trade-usd-input" step="any" min="0" placeholder="0.00" oninput="updateTradeCalculation()"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-16 py-2.5 font-mono text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
+                                <button type="button" onclick="fillMaxTradeAmount()" 
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition">
+                                    MAX
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Percentage Pills -->
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="setTradePercentage(0.25)" class="py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 transition">25%</button>
+                            <button type="button" onclick="setTradePercentage(0.50)" class="py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 transition">50%</button>
+                            <button type="button" onclick="setTradePercentage(0.75)" class="py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 transition">75%</button>
+                            <button type="button" onclick="setTradePercentage(1.00)" class="py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-mono text-slate-300 transition">100%</button>
+                        </div>
+
+                        <!-- Estimated Crypto Output -->
+                        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Est. Quantity</span>
+                                <span id="trade-est-coins" class="font-mono text-slate-200 font-medium">0.000000 BTC</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Network / Execution Fee</span>
+                                <span class="font-mono text-emerald-400">$0.00 (Free)</span>
+                            </div>
+                        </div>
+
+                        <!-- Execute Trade Button -->
+                        <button id="execute-trade-btn" onclick="executeTrade()" 
+                            class="w-full py-3 rounded-xl font-semibold text-sm text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4"></i>
+                            <span id="execute-trade-text">Buy Bitcoin</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Funding Card -->
+                <div class="glass-panel rounded-2xl p-5 border border-slate-800/80">
+                    <h4 class="text-sm font-semibold text-white mb-1">Need USD Funds?</h4>
+                    <p class="text-xs text-slate-400 mb-3">Instant USD deposits starting from a $10.00 minimum. Withdraw anytime.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openWalletModal('DEPOSIT')" class="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Deposit ($10+)
+                        </button>
+                        <button onclick="openWalletModal('WITHDRAW')" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Withdraw
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Legal Disclaimer Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/90 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 mb-6">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+                    <div class="text-xs text-slate-400 leading-relaxed space-y-1.5">
+                        <p class="font-semibold text-slate-300">Legal, Intellectual Property & Risk Disclaimer</p>
+                        <p>
+                            <strong>Open-Source & Decentralized Asset Notice:</strong> All ten (10) digital assets listed on CryptoNova (BTC, ETH, SOL, ADA, AVAX, DOT, LINK, LTC, POL, ATOM) are decentralized, open-source blockchain protocols. Ticker symbols and asset names are used strictly for descriptive, informational, and fair-use trading identification purposes. This platform is an independent interface and is <strong>not affiliated with, endorsed by, sponsored by, or officially connected to</strong> any cryptocurrency foundation, developer group, or trademark holder.
+                        </p>
+                        <p>
+                            <strong>Financial Risk Disclosure:</strong> Cryptocurrency trading involves substantial risk and price volatility. Simulated market feeds and instant execution tools are provided for demonstration and educational trading workflows. Never invest funds you cannot afford to lose.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 CryptoNova Exchange Interface. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <span>Minimum Deposit: $10.00 USD</span>
+                    <span>&bull;</span>
+                    <span>10 Curated Protocols</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Auth Modal (Login / Register) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-fade-in">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center gap-2.5 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <i data-lucide="lock" class="w-4 h-4 text-white"></i>
+                </div>
+                <h3 id="auth-modal-title" class="text-xl font-bold text-white">Sign In to CryptoNova</h3>
+            </div>
+            <p id="auth-modal-subtitle" class="text-xs text-slate-400 mb-6">Access your USD wallet, deposit funds, and trade 10 curated digital assets.</p>
+
+            <!-- Auth Mode Tabs -->
+            <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
+                <button type="button" id="auth-tab-login" onclick="switchAuthMode('LOGIN')" class="py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition">Login</button>
+                <button type="button" id="auth-tab-register" onclick="switchAuthMode('REGISTER')" class="py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Create Account</button>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="auth-name-field" class="hidden">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="auth-name" placeholder="Alex Mercer"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="trader@example.com"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div id="auth-error-msg" class="hidden p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-800 text-center">
+                <button type="button" onclick="quickDemoLogin()" class="text-xs text-cyan-400 hover:text-cyan-300 font-medium">
+                    Instant One-Click Demo Login &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal (Deposit & Withdraw) -->
+    <div id="wallet-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
+            <button onclick="closeWalletModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pr-8 mb-1">
+                <h3 class="text-xl font-bold text-white">USD Wallet Management</h3>
+                <span id="detected-region-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-medium">
+                    Region: Global
+                </span>
+            </div>
+            <p class="text-xs text-slate-400 mb-5">Select your country to view available local & international payment methods.</p>
+
+            <!-- Deposit / Withdraw Switcher -->
+            <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
+                <button type="button" id="wallet-tab-deposit" onclick="switchWalletTab('DEPOSIT')" 
+                    class="py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Deposit USD
+                </button>
+                <button type="button" id="wallet-tab-withdraw" onclick="switchWalletTab('WITHDRAW')" 
+                    class="py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Withdraw USD
+                </button>
+            </div>
+
+            <!-- Current Balance Info -->
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between mb-4">
+                <span class="text-xs text-slate-400">Available USD Balance</span>
+                <span id="modal-usd-balance" class="font-mono font-bold text-white text-base">$0.00</span>
+            </div>
+
+            <!-- Deposit Form -->
+            <form id="deposit-form" onsubmit="handleDepositSubmit(event)" class="space-y-4">
+                <!-- Country / Region Selector -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                            <i data-lucide="globe" class="w-3.5 h-3.5 text-indigo-400"></i>
+                            Country / Region
+                        </label>
+                        <span class="text-[11px] text-slate-500">Filters supported methods</span>
+                    </div>
+                    <div class="relative">
+                        <select id="deposit-country-select" onchange="handleDepositCountryChange(this.value)"
+                            class="w-full appearance-none bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                            <option value="ZW">Zimbabwe (EcoCash, ZIPIT, Bank, Cards, BTC)</option>
+                            <option value="IN">India (PhonePe, Google Pay, Bank, Cards, BTC)</option>
+                            <option value="US">United States / Global (PayPal, Bank, Cards, BTC)</option>
+                            <option value="EU">United Kingdom / Europe (PayPal, Bank, Cards, BTC)</option>
+                            <option value="ALL">All Countries / Show All 9 Methods</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Amount Input -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-300">Deposit Amount (USD)</label>
+                        <span class="text-amber-400 font-medium">Minimum: $10.00 USD</span>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                        <input type="number" id="deposit-amount-input" step="0.01" placeholder="10.00" value="10.00" oninput="renderSelectedMethodDetails()" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 font-mono text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <!-- Quick Preset Amounts -->
+                    <div class="grid grid-cols-4 gap-2 mt-2">
+                        <button type="button" onclick="setDepositPreset(10)" class="py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 border border-slate-700 transition">$10</button>
+                        <button type="button" onclick="setDepositPreset(50)" class="py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 border border-slate-700 transition">$50</button>
+                        <button type="button" onclick="setDepositPreset(100)" class="py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 border border-slate-700 transition">$100</button>
+                        <button type="button" onclick="setDepositPreset(500)" class="py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 border border-slate-700 transition">$500</button>
+                    </div>
+                </div>
+
+                <!-- Region-Filtered Payment Method Cards -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-2">Select Payment Method</label>
+                    <div id="deposit-methods-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <!-- Rendered dynamically based on country -->
+                    </div>
+                </div>
+
+                <!-- Dynamic Payment Method Instructions & Inputs -->
+                <div id="deposit-method-details" class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+                    <!-- Rendered dynamically based on selected method -->
+                </div>
+
+                <div id="deposit-error" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                    <span id="deposit-error-text">Minimum deposit is $10.00 USD.</span>
+                </div>
+
+                <button type="submit" id="confirm-deposit-btn" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>Confirm Deposit</span>
+                </button>
+            </form>
+
+            <!-- Withdraw Form -->
+            <form id="withdraw-form" onsubmit="handleWithdrawSubmit(event)" class="space-y-4 hidden">
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-300">Withdraw Amount (USD)</label>
+                        <button type="button" onclick="setWithdrawMax()" class="text-indigo-400 hover:text-indigo-300 font-medium">Withdraw Max</button>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
+                        <input type="number" id="withdraw-amount-input" step="0.01" placeholder="10.00" required
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 font-mono text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">Minimum withdrawal: $5.00 USD. Processed instantly to your selected payout channel.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Withdrawal Method</label>
+                    <select id="withdraw-method" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <option value="Bank Transfer (Local / Wire)">Bank Transfer (Local / Wire)</option>
+                        <option value="EcoCash Mobile Wallet">EcoCash Mobile Wallet</option>
+                        <option value="ZIPIT Instant Bank">ZIPIT Instant Bank</option>
+                        <option value="UPI (PhonePe / Google Pay)">UPI (PhonePe / Google Pay)</option>
+                        <option value="PayPal Payout">PayPal Payout</option>
+                        <option value="Visa / Mastercard Direct">Visa / Mastercard Direct</option>
+                        <option value="Bitcoin (BTC) Network">Bitcoin (BTC) Network</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Account / Wallet / Number</label>
+                    <input type="text" id="withdraw-destination" required placeholder="e.g., +263 77... / user@okaxis / Bank Acc" value="Linked Checking •••• 4821"
+                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div id="withdraw-error" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                    <span id="withdraw-error-text">Invalid withdrawal amount.</span>
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/20 transition">
+                    Confirm Withdrawal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. CURATED 10 OPEN-SOURCE CRYPTOCURRENCIES
+        // ==========================================
+        const COINS_DATA = [
+            { symbol: 'BTC', name: 'Bitcoin', price: 92450.00, change24h: 2.34, marketCap: '$1.82T', color: '#F7931A', sparkline: [89200, 90100, 89800, 91200, 91900, 92100, 92450] },
+            { symbol: 'ETH', name: 'Ethereum', price: 3180.50, change24h: 1.85, marketCap: '$383.4B', color: '#627EEA', sparkline: [3090, 3110, 3105, 3140, 3165, 3172, 3180.5] },
+            { symbol: 'SOL', name: 'Solana', price: 214.20, change24h: 4.62, marketCap: '$101.2B', color: '#14F195', sparkline: [198, 202, 205, 209, 207, 212, 214.2] },
+            { symbol: 'ADA', name: 'Cardano', price: 0.78, change24h: -1.12, marketCap: '$27.4B', color: '#0033AD', sparkline: [0.81, 0.80, 0.79, 0.80, 0.79, 0.785, 0.78] },
+            { symbol: 'AVAX', name: 'Avalanche', price: 36.45, change24h: 3.18, marketCap: '$14.9B', color: '#E84142', sparkline: [34.2, 34.8, 35.1, 35.0, 35.9, 36.1, 36.45] },
+            { symbol: 'DOT', name: 'Polkadot', price: 6.92, change24h: -0.65, marketCap: '$10.5B', color: '#E6007A', sparkline: [7.05, 7.01, 6.98, 6.95, 6.99, 6.94, 6.92] },
+            { symbol: 'LINK', name: 'Chainlink', price: 15.84, change24h: 2.91, marketCap: '$9.9B', color: '#2A5ADA', sparkline: [15.1, 15.3, 15.25, 15.5, 15.6, 15.75, 15.84] },
+            { symbol: 'LTC', name: 'Litecoin', price: 88.60, change24h: 0.94, marketCap: '$6.6B', color: '#345D9D', sparkline: [86.9, 87.2, 87.8, 87.5, 88.1, 88.4, 88.6] },
+            { symbol: 'POL', name: 'Polygon', price: 0.54, change24h: -2.04, marketCap: '$5.4B', color: '#8247E5', sparkline: [0.57, 0.565, 0.56, 0.555, 0.55, 0.545, 0.54] },
+            { symbol: 'ATOM', name: 'Cosmos', price: 6.45, change24h: 1.42, marketCap: '$2.5B', color: '#2E3148', sparkline: [6.28, 6.31, 6.35, 6.33, 6.40, 6.42, 6.45] }
+        ];
+
+        // ==========================================
+        // 2. APPLICATION STATE & REGION DEPOSIT CONFIG
+        // ==========================================
+        const DEPOSIT_METHODS_CATALOG = {
+            ecocash: { id: 'ecocash', name: 'EcoCash', badge: 'Mobile Money', color: '#00A651', icon: 'smartphone' },
+            zipit: { id: 'zipit', name: 'ZIPIT', badge: 'Instant Bank', color: '#0EA5E9', icon: 'building-2' },
+            phonepe: { id: 'phonepe', name: 'PhonePe', badge: 'UPI Instant', color: '#5F259F', icon: 'smartphone' },
+            gpay: { id: 'gpay', name: 'Google Pay', badge: 'UPI / Wallet', color: '#4285F4', icon: 'wallet' },
+            paypal: { id: 'paypal', name: 'PayPal', badge: 'Express', color: '#0070BA', icon: 'badge-dollar-sign' },
+            bank: { id: 'bank', name: 'Bank Transfer', badge: 'Wire / Local', color: '#6366F1', icon: 'landmark' },
+            visa: { id: 'visa', name: 'Visa Card', badge: 'Debit / Credit', color: '#1A1F71', icon: 'credit-card' },
+            mastercard: { id: 'mastercard', name: 'Mastercard', badge: 'Debit / Credit', color: '#EB001B', icon: 'credit-card' },
+            bitcoin: { id: 'bitcoin', name: 'Bitcoin', badge: 'BTC On-Chain', color: '#F7931A', icon: 'bitcoin' }
+        };
+
+        const COUNTRY_DEPOSIT_CONFIG = {
+            ZW: {
+                label: 'Zimbabwe',
+                methods: ['ecocash', 'zipit', 'bank', 'visa', 'mastercard', 'bitcoin']
+            },
+            IN: {
+                label: 'India',
+                methods: ['phonepe', 'gpay', 'bank', 'visa', 'mastercard', 'bitcoin']
+            },
+            US: {
+                label: 'United States / Global',
+                methods: ['paypal', 'bank', 'visa', 'mastercard', 'bitcoin']
+            },
+            EU: {
+                label: 'UK / Europe',
+                methods: ['paypal', 'bank', 'visa', 'mastercard', 'bitcoin']
+            },
+            ALL: {
+                label: 'All Countries',
+                methods: ['ecocash', 'zipit', 'phonepe', 'gpay', 'paypal', 'bank', 'visa', 'mastercard', 'bitcoin']
+            }
+        };
+
+        function detectDefaultCountry() {
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+                const lang = (navigator.language || '').toUpperCase();
+                if (tz.includes('Harare') || lang.endsWith('-ZW')) return 'ZW';
+                if (tz.includes('Kolkata') || tz.includes('Calcutta') || lang.endsWith('-IN')) return 'IN';
+                if (tz.includes('Europe/') || tz.includes('London') || lang.endsWith('-GB')) return 'EU';
+                if (tz.includes('America/') || lang.endsWith('-US')) return 'US';
+            } catch (e) {
+                // Fallback safely
+            }
+            return 'ALL';
+        }
+
+        const state = {
+            user: null, // { name, email }
+            usdBalance: 0.00,
+            holdings: {}, // e.g., { BTC: 0.005, SOL: 2.0 }
+            transactions: [], // { id, type, title, details, amountStr, isPositive, timestamp }
+            selectedCoinSymbol: 'BTC',
+            tradeMode: 'BUY', // 'BUY' | 'SELL'
+            authMode: 'LOGIN', // 'LOGIN' | 'REGISTER'
+            searchQuery: '',
+            depositCountry: detectDefaultCountry(),
+            selectedDepositMethod: 'visa'
+        };
+// ... existing code ... -->
+        // ==========================================
+        // 6. WALLET: DEPOSIT ($10 MIN) & WITHDRAW
+        // ==========================================
+        function openWalletModal(tab = 'DEPOSIT') {
+            if (!state.user) {
+                openAuthModal('LOGIN');
+                showToast('Authentication Required', 'Please log in to deposit or withdraw USD.', 'info');
+                return;
+            }
+            switchWalletTab(tab);
+            document.getElementById('modal-usd-balance').textContent = formatUSD(state.usdBalance);
+            document.getElementById('deposit-error').classList.add('hidden');
+            document.getElementById('withdraw-error').classList.add('hidden');
+
+            // Sync country & deposit methods
+            const countrySelect = document.getElementById('deposit-country-select');
+            if (countrySelect) {
+                countrySelect.value = state.depositCountry;
+                handleDepositCountryChange(state.depositCountry, false);
+            }
+
+            document.getElementById('wallet-modal').classList.remove('hidden');
+            document.getElementById('wallet-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function handleDepositCountryChange(countryCode, keepAmount = true) {
+            state.depositCountry = countryCode;
+            const cfg = COUNTRY_DEPOSIT_CONFIG[countryCode] || COUNTRY_DEPOSIT_CONFIG.ALL;
+            const badge = document.getElementById('detected-region-badge');
+            if (badge) badge.textContent = `Region: ${cfg.label}`;
+
+            // Ensure currently selected method is valid for the new country
+            if (!cfg.methods.includes(state.selectedDepositMethod)) {
+                state.selectedDepositMethod = cfg.methods[0];
+            }
+            renderDepositMethodsGrid();
+            renderSelectedMethodDetails();
+        }
+
+        function selectDepositMethod(methodId) {
+            state.selectedDepositMethod = methodId;
+            document.getElementById('deposit-error').classList.add('hidden');
+            renderDepositMethodsGrid();
+            renderSelectedMethodDetails();
+        }
+
+        function renderDepositMethodsGrid() {
+            const grid = document.getElementById('deposit-methods-grid');
+            if (!grid) return;
+            const cfg = COUNTRY_DEPOSIT_CONFIG[state.depositCountry] || COUNTRY_DEPOSIT_CONFIG.ALL;
+
+            grid.innerHTML = cfg.methods.map(id => {
+                const m = DEPOSIT_METHODS_CATALOG[id];
+                const isSelected = state.selectedDepositMethod === id;
+                return `
+                    <button type="button" onclick="selectDepositMethod('${id}')"
+                        class="p-2.5 rounded-xl border text-left transition flex flex-col justify-between gap-1.5 ${
+                            isSelected 
+                                ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-md shadow-indigo-500/10' 
+                                : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
+                        }">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="w-7 h-7 rounded-lg flex items-center justify-center text-white" style="background-color: ${m.color}33; border: 1px solid ${m.color}66;">
+                                <i data-lucide="${m.icon}" class="w-3.5 h-3.5" style="color: ${m.color === '#1A1F71' ? '#818cf8' : m.color};"></i>
+                            </span>
+                            ${isSelected ? '<span class="w-2 h-2 rounded-full bg-indigo-400"></span>' : ''}
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold leading-tight">${m.name}</div>
+                            <div class="text-[10px] text-slate-400">${m.badge}</div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            lucide.createIcons({ root: grid });
+        }
+
+        function copyTextFallback(text, label) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('Copied', `${label} copied to clipboard.`, 'info');
+        }
+
+        function renderSelectedMethodDetails() {
+            const container = document.getElementById('deposit-method-details');
+            if (!container) return;
+
+            const amount = parseFloat(document.getElementById('deposit-amount-input').value) || 0;
+            const btcPrice = COINS_DATA[0].price;
+            const btcEst = (amount / btcPrice).toFixed(6);
+            const inrEst = (amount * 84.40).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+            const refCode = `CN-${Math.floor(100000 + Math.random() * 900000)}`;
+
+            const templates = {
+                ecocash: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-emerald-400">EcoCash USD Mobile Money</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Merchant: 084921</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">EcoCash Mobile Number (Zimbabwe)</label>
+                        <input type="tel" id="method-detail-input" required placeholder="+263 77 123 4567"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <p class="text-[11px] text-slate-400">You will receive an instant USSD PIN prompt on your handset to authorize <strong class="text-white">${formatUSD(amount)}</strong>.</p>
+                `,
+                zipit: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-sky-400">ZIPIT Instant Bank Transfer</span>
+                        <span class="text-[10px] font-mono text-slate-400">Ref: ${refCode}</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Select Sending Bank</label>
+                        <select id="method-detail-input" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                            <option value="CBZ Bank">CBZ Bank</option>
+                            <option value="Stanbic Bank">Stanbic Bank</option>
+                            <option value="FBC Bank">FBC Bank</option>
+                            <option value="Steward Bank">Steward Bank</option>
+                            <option value="Ecobank Zimbabwe">Ecobank Zimbabwe</option>
+                            <option value="First Capital Bank">First Capital Bank</option>
+                        </select>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Destination: <span class="font-mono text-slate-200">CryptoNova Settlement • Acc: 4401928371</span></p>
+                `,
+                phonepe: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-purple-400">PhonePe UPI Instant</span>
+                        <span class="text-[11px] font-mono text-slate-300">≈ ₹${inrEst} INR</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Your PhonePe UPI ID</label>
+                        <input type="text" id="method-detail-input" required placeholder="yourname@ybl"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <p class="text-[11px] text-slate-400">A collect request for <strong class="text-white">${formatUSD(amount)} (₹${inrEst})</strong> will be sent to your PhonePe app.</p>
+                `,
+                gpay: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-blue-400">Google Pay (GPay / UPI)</span>
+                        <span class="text-[11px] font-mono text-slate-300">≈ ₹${inrEst} INR</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Google Pay UPI ID or Email</label>
+                        <input type="text" id="method-detail-input" required placeholder="yourname@okaxis"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <p class="text-[11px] text-slate-400">Instant zero-fee settlement into your CryptoNova USD balance.</p>
+                `,
+                paypal: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-sky-400">PayPal Express Checkout</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">Instant</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">PayPal Account Email</label>
+                        <input type="email" id="method-detail-input" required placeholder="payer@paypal.com" value="${state.user ? state.user.email : ''}"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
+                    </div>
+                    <p class="text-[11px] text-slate-400">Authorized USD funds are credited immediately upon confirmation.</p>
+                `,
+                bank: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-indigo-400">Bank Transfer (Wire / SEPA / ACH / NEFT)</span>
+                        <span class="text-[10px] font-mono text-slate-400">Ref: ${refCode}</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] space-y-1 font-mono text-slate-300">
+                        <div class="flex justify-between"><span>Beneficiary:</span><span class="text-white">CryptoNova Clearing Ltd</span></div>
+                        <div class="flex justify-between"><span>Account / IBAN:</span><span class="text-white">US89 0210 0002 9948 12</span></div>
+                        <div class="flex justify-between"><span>SWIFT / Routing:</span><span class="text-white">CHASUS33 / 021000021</span></div>
+                    </div>
+                    <input type="hidden" id="method-detail-input" value="Bank Ref ${refCode}">
+                `,
+                visa: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-indigo-300">Visa Debit / Credit Card</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300">3D Secure</span>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="text" id="method-detail-input" required maxlength="19" placeholder="4532 •••• •••• 8890"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" required maxlength="5" placeholder="MM/YY"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                            <input type="password" required maxlength="4" placeholder="CVV"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                `,
+                mastercard: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-rose-400">Mastercard Debit / Credit</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-300">ID Check</span>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="text" id="method-detail-input" required maxlength="19" placeholder="5412 •••• •••• 3419"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-rose-500">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" required maxlength="5" placeholder="MM/YY"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-rose-500">
+                            <input type="password" required maxlength="4" placeholder="CVC"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-rose-500">
+                        </div>
+                    </div>
+                `,
+                bitcoin: `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-amber-400">Bitcoin (BTC) Deposit</span>
+                        <span class="text-[11px] font-mono text-amber-300">Send: ${btcEst} BTC</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-mono text-slate-300 truncate">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+                        <button type="button" onclick="copyTextFallback('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', 'BTC Wallet Address')"
+                            class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-white shrink-0 transition">
+                            Copy
+                        </button>
+                    </div>
+                    <input type="hidden" id="method-detail-input" value="BTC On-Chain (${btcEst} BTC)">
+                    <p class="text-[11px] text-slate-400">Auto-converts to <strong class="text-white">${formatUSD(amount)}</strong> USD upon network confirmation (Min $10 USD).</p>
+                `
+            };
+
+            container.innerHTML = templates[state.selectedDepositMethod] || '';
+        }
+
+        function closeWalletModal() {
+            document.getElementById('wallet-modal').classList.add('hidden');
+            document.getElementById('wallet-modal').classList.remove('flex');
+        }
+
+        function switchWalletTab(tab) {
+            const depTab = document.getElementById('wallet-tab-deposit');
+            const witTab = document.getElementById('wallet-tab-withdraw');
+            const depForm = document.getElementById('deposit-form');
+            const witForm = document.getElementById('withdraw-form');
+
+            if (tab === 'DEPOSIT') {
+                depTab.className = 'py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition flex items-center justify-center gap-1.5';
+                witTab.className = 'py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
+                depForm.classList.remove('hidden');
+                witForm.classList.add('hidden');
+            } else {
+                witTab.className = 'py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition flex items-center justify-center gap-1.5';
+                depTab.className = 'py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
+                witForm.classList.remove('hidden');
+                depForm.classList.add('hidden');
+            }
+        }
+
+        function setDepositPreset(amount) {
+            document.getElementById('deposit-amount-input').value = amount.toFixed(2);
+            document.getElementById('deposit-error').classList.add('hidden');
+            renderSelectedMethodDetails();
+        }
+
+        function handleDepositSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('deposit-amount-input');
+            const methodObj = DEPOSIT_METHODS_CATALOG[state.selectedDepositMethod] || DEPOSIT_METHODS_CATALOG.visa;
+            const countryObj = COUNTRY_DEPOSIT_CONFIG[state.depositCountry] || COUNTRY_DEPOSIT_CONFIG.ALL;
+            const detailInput = document.getElementById('method-detail-input');
+            const detailVal = detailInput ? detailInput.value.trim() : '';
+
+            const errBox = document.getElementById('deposit-error');
+            const errText = document.getElementById('deposit-error-text');
+            const amount = parseFloat(input.value);
+
+            // Strictly enforce $10.00 USD minimum deposit
+            if (isNaN(amount) || amount < 10) {
+                errText.textContent = 'Minimum deposit is $10.00 USD. Please enter $10.00 or more.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            state.usdBalance += amount;
+            const summaryDetail = detailVal ? `${methodObj.name} (${countryObj.label}) • ${detailVal}` : `${methodObj.name} (${countryObj.label})`;
+            logTransaction('DEPOSIT', `USD Deposit via ${methodObj.name}`, summaryDetail, `+${formatUSD(amount)}`, true);
+            
+            input.value = '10.00';
+            closeWalletModal();
+            renderAll();
+            showToast('Deposit Successful', `${formatUSD(amount)} deposited via ${methodObj.name}.`, 'success');
+        }
+
+        function setWithdrawMax() {
+            document.getElementById('withdraw-amount-input').value = state.usdBalance.toFixed(2);
+            document.getElementById('withdraw-error').classList.add('hidden');
+        }
+
+        function handleWithdrawSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('withdraw-amount-input');
+            const method = document.getElementById('withdraw-method').value;
+            const dest = document.getElementById('withdraw-destination').value.trim();
+            const errBox = document.getElementById('withdraw-error');
+            const errText = document.getElementById('withdraw-error-text');
+            const amount = parseFloat(input.value);
+
+            if (isNaN(amount) || amount < 5) {
+                errText.textContent = 'Minimum withdrawal amount is $5.00 USD.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (amount > state.usdBalance) {
+                errText.textContent = `Insufficient balance. Available: ${formatUSD(state.usdBalance)}.`;
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            state.usdBalance -= amount;
+            logTransaction('WITHDRAW', `USD Withdrawal (${method})`, dest || 'Linked Account', `-${formatUSD(amount)}`, false);
+
+            input.value = '';
+            closeWalletModal();
+            renderAll();
+            showToast('Withdrawal Initiated', `${formatUSD(amount)} sent via ${method}.`, 'info');
+        }
+
+        // ==========================================
+        // 3. FORMATTING & SVG HELPERS
+        // ==========================================
+        function formatUSD(val) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: val < 1 ? 4 : 2
+            }).format(val);
+        }
+
+        function formatCrypto(val, symbol) {
+            const decimals = val >= 100 ? 2 : (val >= 1 ? 4 : 6);
+            return `${Number(val).toFixed(decimals)} ${symbol}`;
+        }
+
+        function generateCoinBadgeSVG(coin) {
+            return `
+                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-inner" 
+                     style="background: linear-gradient(135deg, ${coin.color}, #1e293b); border: 1px solid ${coin.color}66;">
+                    ${coin.symbol.slice(0, 3)}
+                </div>
+            `;
+        }
+
+        function generateSparklineSVG(data, isPositive) {
+            const width = 96;
+            const height = 28;
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const range = max - min || 1;
+
+            const points = data.map((val, idx) => {
+                const x = (idx / (data.length - 1)) * width;
+                const y = height - ((val - min) / range) * (height - 6) - 3;
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+
+            const strokeColor = isPositive ? '#34d399' : '#f87171';
+            return `
+                <svg width="${width}" height="${height}" class="inline-block overflow-visible">
+                    <polyline fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
+                </svg>
+            `;
+        }
+
+        // ==========================================
+        // 4. TOAST NOTIFICATIONS
+        // ==========================================
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'border-emerald-500/40 bg-slate-900/95 text-emerald-400',
+                error: 'border-red-500/40 bg-slate-900/95 text-red-400',
+                info: 'border-indigo-500/40 bg-slate-900/95 text-indigo-400'
+            };
+            const iconName = type === 'success' ? 'check-circle-2' : (type === 'error' ? 'alert-octagon' : 'info');
+
+            toast.className = `pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type]}`;
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-white">${title}</p>
+                    <p class="text-xs text-slate-300 mt-0.5">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
+        }
+
+        // ==========================================
+        // 5. AUTHENTICATION FLOW
+        // ==========================================
+        function openAuthModal(mode = 'LOGIN') {
+            switchAuthMode(mode);
+            document.getElementById('auth-error-msg').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.add('flex');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('flex');
+        }
+
+        function switchAuthMode(mode) {
+            state.authMode = mode;
+            const loginTab = document.getElementById('auth-tab-login');
+            const regTab = document.getElementById('auth-tab-register');
+            const nameField = document.getElementById('auth-name-field');
+            const title = document.getElementById('auth-modal-title');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (mode === 'LOGIN') {
+                loginTab.className = 'py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition';
+                regTab.className = 'py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
+                nameField.classList.add('hidden');
+                title.textContent = 'Sign In to CryptoNova';
+                submitBtn.textContent = 'Sign In';
+            } else {
+                regTab.className = 'py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition';
+                loginTab.className = 'py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
+                nameField.classList.remove('hidden');
+                title.textContent = 'Create Trading Account';
+                submitBtn.textContent = 'Register & Start';
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const nameInput = document.getElementById('auth-name').value.trim();
+            const errBox = document.getElementById('auth-error-msg');
+
+            if (password.length < 4) {
+                errBox.textContent = 'Password must be at least 4 characters.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const displayName = state.authMode === 'REGISTER' && nameInput 
+                ? nameInput 
+                : email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+
+            loginUser({ name: displayName, email });
+            closeAuthModal();
+            showToast('Welcome to CryptoNova', `Signed in as ${displayName}. Minimum deposit is $10.00 USD.`, 'success');
+        }
+
+        function quickDemoLogin() {
+            loginUser({ name: 'Alex Trader', email: 'alex.trader@cryptonova.io' });
+            // Give demo user $250 starting balance if account is completely fresh
+            if (state.usdBalance === 0 && state.transactions.length === 0) {
+                state.usdBalance = 250.00;
+                logTransaction('DEPOSIT', 'Welcome Demo Deposit', 'Instant Card', '+$250.00', true);
+            }
+            closeAuthModal();
+            renderAll();
+            showToast('Demo Session Active', 'Logged in with $250.00 USD ready to trade.', 'info');
+        }
+
+        function loginUser(userObj) {
+            state.user = userObj;
+            renderAll();
+        }
+
+        function logoutUser() {
+            state.user = null;
+            renderAll();
+            showToast('Signed Out', 'Your trading session has been locked.', 'info');
+        }
+
+        // ==========================================
+        // 7. SPOT TRADING ENGINE (BUY / SELL)
+        // ==========================================
+        function getSelectedCoin() {
+            return COINS_DATA.find(c => c.symbol === state.selectedCoinSymbol) || COINS_DATA[0];
+        }
+
+        function selectCoinForTrade(symbol, mode = 'BUY') {
+            state.selectedCoinSymbol = symbol;
+            document.getElementById('trade-coin-select').value = symbol;
+            setTradeMode(mode);
+            updateTradeCalculation();
+            
+            // Smooth scroll to trade panel on mobile
+            if (window.innerWidth < 1024) {
+                document.getElementById('trade-usd-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function handleCoinSelectChange(symbol) {
+            state.selectedCoinSymbol = symbol;
+            updateTradePanelUI();
+        }
+
+        function setTradeMode(mode) {
+            state.tradeMode = mode;
+            const buyBtn = document.getElementById('trade-mode-buy');
+            const sellBtn = document.getElementById('trade-mode-sell');
+            const execBtn = document.getElementById('execute-trade-btn');
+
+            if (mode === 'BUY') {
+                buyBtn.className = 'py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white shadow transition';
+                sellBtn.className = 'py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition';
+                execBtn.className = 'w-full py-3 rounded-xl font-semibold text-sm text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2';
+            } else {
+                sellBtn.className = 'py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white shadow transition';
+                buyBtn.className = 'py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition';
+                execBtn.className = 'w-full py-3 rounded-xl font-semibold text-sm text-white bg-rose-600 hover:bg-rose-500 shadow-lg shadow-rose-600/20 transition flex items-center justify-center gap-2';
+            }
+            updateTradePanelUI();
+        }
+
+        function updateTradePanelUI() {
+            const coin = getSelectedCoin();
+            document.getElementById('trade-live-price').textContent = formatUSD(coin.price);
+            document.getElementById('execute-trade-text').textContent = `${state.tradeMode === 'BUY' ? 'Buy' : 'Sell'} ${coin.name}`;
+
+            if (state.tradeMode === 'BUY') {
+                document.getElementById('trade-available-balance').textContent = formatUSD(state.usdBalance);
+            } else {
+                const ownedQty = state.holdings[coin.symbol] || 0;
+                const ownedUsdVal = ownedQty * coin.price;
+                document.getElementById('trade-available-balance').textContent = `${formatCrypto(ownedQty, coin.symbol)} (~${formatUSD(ownedUsdVal)})`;
+            }
+            updateTradeCalculation();
+        }
+
+        function updateTradeCalculation() {
+            const coin = getSelectedCoin();
+            const usdVal = parseFloat(document.getElementById('trade-usd-input').value) || 0;
+            const estCoins = usdVal / coin.price;
+            document.getElementById('trade-est-coins').textContent = formatCrypto(estCoins, coin.symbol);
+        }
+
+        function setTradePercentage(pct) {
+            if (!state.user) {
+                openAuthModal('LOGIN');
+                return;
+            }
+            const coin = getSelectedCoin();
+            let maxUsd = 0;
+            if (state.tradeMode === 'BUY') {
+                maxUsd = state.usdBalance;
+            } else {
+                const ownedQty = state.holdings[coin.symbol] || 0;
+                maxUsd = ownedQty * coin.price;
+            }
+            const target = (maxUsd * pct);
+            document.getElementById('trade-usd-input').value = target > 0 ? target.toFixed(2) : '';
+            updateTradeCalculation();
+        }
+
+        function fillMaxTradeAmount() {
+            setTradePercentage(1.0);
+        }
+
+        function executeTrade() {
+            if (!state.user) {
+                openAuthModal('LOGIN');
+                showToast('Sign In Required', 'Please log in to execute spot trades.', 'info');
+                return;
+            }
+
+            const coin = getSelectedCoin();
+            const usdAmount = parseFloat(document.getElementById('trade-usd-input').value);
+
+            if (isNaN(usdAmount) || usdAmount <= 0) {
+                showToast('Invalid Amount', 'Please enter a valid USD trade amount.', 'error');
+                return;
+            }
+
+            const coinQty = usdAmount / coin.price;
+
+            if (state.tradeMode === 'BUY') {
+                if (usdAmount > state.usdBalance + 0.0001) {
+                    showToast('Insufficient USD Balance', 'Deposit at least $10.00 USD to fund this order.', 'error');
+                    return;
+                }
+                state.usdBalance = Math.max(0, state.usdBalance - usdAmount);
+                state.holdings[coin.symbol] = (state.holdings[coin.symbol] || 0) + coinQty;
+                logTransaction('BUY', `Bought ${coin.symbol}`, `${formatCrypto(coinQty, coin.symbol)} @ ${formatUSD(coin.price)}`, `-${formatUSD(usdAmount)}`, false);
+                showToast('Order Filled', `Purchased ${formatCrypto(coinQty, coin.symbol)} for ${formatUSD(usdAmount)}.`, 'success');
+            } else {
+                const currentHolding = state.holdings[coin.symbol] || 0;
+                const maxSellUsd = currentHolding * coin.price;
+                if (usdAmount > maxSellUsd + 0.01 || currentHolding <= 0) {
+                    showToast(`Insufficient ${coin.symbol}`, `You do not hold enough ${coin.name} to sell this amount.`, 'error');
+                    return;
+                }
+                const actualQtySold = Math.min(currentHolding, coinQty);
+                state.holdings[coin.symbol] = Math.max(0, currentHolding - actualQtySold);
+                if (state.holdings[coin.symbol] < 1e-8) delete state.holdings[coin.symbol];
+                
+                state.usdBalance += usdAmount;
+                logTransaction('SELL', `Sold ${coin.symbol}`, `${formatCrypto(actualQtySold, coin.symbol)} @ ${formatUSD(coin.price)}`, `+${formatUSD(usdAmount)}`, true);
+                showToast('Order Filled', `Sold ${formatCrypto(actualQtySold, coin.symbol)} for ${formatUSD(usdAmount)}.`, 'success');
+            }
+
+            document.getElementById('trade-usd-input').value = '';
+            renderAll();
+        }
+
+        function logTransaction(type, title, details, amountStr, isPositive) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            state.transactions.unshift({
+                id: crypto.randomUUID(),
+                type,
+                title,
+                details,
+                amountStr,
+                isPositive,
+                timestamp: timeStr
+            });
+        }
+
+        // ==========================================
+        // 8. UI RENDERING FUNCTIONS
+        // ==========================================
+        function renderHeaderAuth() {
+            const container = document.getElementById('nav-auth-section');
+            if (!state.user) {
+                container.innerHTML = `
+                    <button onclick="openAuthModal('LOGIN')" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white transition">
+                        Log In
+                    </button>
+                    <button onclick="openAuthModal('REGISTER')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 transition">
+                        Get Started
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="hidden sm:flex flex-col items-end mr-1">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400">USD Balance</span>
+                        <span class="font-mono text-sm font-bold text-emerald-400">${formatUSD(state.usdBalance)}</span>
+                    </div>
+                    <button onclick="openWalletModal('DEPOSIT')" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition flex items-center gap-1.5">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>Deposit</span>
+                    </button>
+                    <div class="flex items-center gap-2 pl-2 border-l border-slate-800">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-indigo-300 uppercase">
+                            ${state.user.name.slice(0, 2)}
+                        </div>
+                        <button onclick="logoutUser()" title="Sign Out" class="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800/80 transition">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateTotalPortfolioValue() {
+            let cryptoTotal = 0;
+            for (const [symbol, qty] of Object.entries(state.holdings)) {
+                const coin = COINS_DATA.find(c => c.symbol === symbol);
+                if (coin) cryptoTotal += qty * coin.price;
+            }
+            return {
+                cryptoTotal,
+                netWorth: state.usdBalance + cryptoTotal
+            };
+        }
+
+        function renderAccountBanner() {
+            const banner = document.getElementById('account-banner');
+            if (!state.user) {
+                banner.innerHTML = `
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-1">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                Start Trading with $10 Minimum Deposit
+                            </div>
+                            <h1 class="text-xl sm:text-2xl font-bold text-white">Trade 10 Decentralized Digital Assets</h1>
+                            <p class="text-xs sm:text-sm text-slate-400 max-w-2xl">
+                                Sign in or create an instant account to deposit USD (minimum $10.00), build your portfolio across 10 curated open-source coins, and withdraw anytime.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 shrink-0">
+                            <button onclick="quickDemoLogin()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs sm:text-sm font-semibold transition">
+                                Try Demo Account
+                            </button>
+                            <button onclick="openAuthModal('REGISTER')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-600/25 transition">
+                                Login / Register
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const { cryptoTotal, netWorth } = calculateTotalPortfolioValue();
+                banner.innerHTML = `
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div>
+                            <p class="text-xs text-slate-400">Welcome back, <span class="text-white font-semibold">${state.user.name}</span></p>
+                            <div class="flex flex-wrap items-baseline gap-4 mt-1">
+                                <div>
+                                    <span class="text-[11px] uppercase tracking-wider text-slate-500 block">Total Net Worth</span>
+                                    <span class="text-2xl sm:text-3xl font-bold font-mono text-white">${formatUSD(netWorth)}</span>
+                                </div>
+                                <div class="h-8 w-px bg-slate-800 hidden sm:block"></div>
+                                <div>
+                                    <span class="text-[11px] uppercase tracking-wider text-slate-500 block">Available USD</span>
+                                    <span class="text-lg sm:text-xl font-semibold font-mono text-emerald-400">${formatUSD(state.usdBalance)}</span>
+                                </div>
+                                <div class="h-8 w-px bg-slate-800 hidden sm:block"></div>
+                                <div>
+                                    <span class="text-[11px] uppercase tracking-wider text-slate-500 block">Crypto Holdings</span>
+                                    <span class="text-lg sm:text-xl font-semibold font-mono text-indigo-400">${formatUSD(cryptoTotal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button onclick="openWalletModal('DEPOSIT')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
+                                <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                                Deposit USD ($10 Min)
+                            </button>
+                            <button onclick="openWalletModal('WITHDRAW')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs sm:text-sm font-semibold transition flex items-center gap-2">
+                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                                Withdraw USD
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCoinsTable(flashes = {}) {
+            const tbody = document.getElementById('coins-table-body');
+            const query = state.searchQuery.toLowerCase();
+            const filtered = COINS_DATA.filter(c => 
+                c.name.toLowerCase().includes(query) || c.symbol.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400 text-sm">No matching assets in the 10-coin curated list.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(coin => {
+                const isPos = coin.change24h >= 0;
+                const flashClass = flashes[coin.symbol] === 'up' ? 'price-flash-up' : (flashes[coin.symbol] === 'down' ? 'price-flash-down' : '');
+                const isSelected = state.selectedCoinSymbol === coin.symbol;
+
+                return `
+                    <tr onclick="selectCoinForTrade('${coin.symbol}', 'BUY')" 
+                        class="cursor-pointer transition hover:bg-slate-800/50 ${isSelected ? 'bg-indigo-950/30' : ''}">
+                        <td class="py-3.5 pl-5 pr-3">
+                            <div class="flex items-center gap-3">
+                                ${generateCoinBadgeSVG(coin)}
+                                <div>
+                                    <div class="font-semibold text-white flex items-center gap-1.5">
+                                        ${coin.name}
+                                        ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>' : ''}
+                                    </div>
+                                    <div class="text-xs font-mono text-slate-400">${coin.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-3 text-right font-mono font-semibold text-white ${flashClass}">
+                            ${formatUSD(coin.price)}
+                        </td>
+                        <td class="py-3.5 px-3 text-right font-mono text-xs font-medium ${isPos ? 'text-emerald-400' : 'text-rose-400'}">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md ${isPos ? 'bg-emerald-500/10' : 'bg-rose-500/10'}">
+                                ${isPos ? '+' : ''}${coin.change24h.toFixed(2)}%
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 text-right font-mono text-xs text-slate-400 hidden sm:table-cell">
+                            ${coin.marketCap}
+                        </td>
+                        <td class="py-3.5 px-3 text-center hidden md:table-cell">
+                            ${generateSparklineSVG(coin.sparkline, isPos)}
+                        </td>
+                        <td class="py-3.5 pl-3 pr-5 text-right" onclick="event.stopPropagation()">
+                            <button onclick="selectCoinForTrade('${coin.symbol}', 'BUY')" 
+                                class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold transition">
+                                Trade
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderPortfolio() {
+            const container = document.getElementById('portfolio-list');
+            const entries = Object.entries(state.holdings);
+
+            if (!state.user) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-sm text-slate-400 mb-3">Sign in to view and manage your cryptocurrency holdings.</p>
+                        <button onclick="openAuthModal('LOGIN')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition">
+                            Sign In Now
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (entries.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 space-y-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-800/80 flex items-center justify-center mx-auto text-slate-400">
+                            <i data-lucide="wallet" class="w-5 h-5"></i>
+                        </div>
+                        <p class="text-sm font-medium text-slate-300">No Crypto Holdings Yet</p>
+                        <p class="text-xs text-slate-500 max-w-xs mx-auto">Deposit at least $10.00 USD and use the Spot Trade terminal to purchase any of the 10 curated coins.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    ${entries.map(([symbol, qty]) => {
+                        const coin = COINS_DATA.find(c => c.symbol === symbol);
+                        if (!coin) return '';
+                        const valueUsd = qty * coin.price;
+                        return `
+                            <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    ${generateCoinBadgeSVG(coin)}
+                                    <div>
+                                        <div class="font-semibold text-white text-sm">${coin.name}</div>
+                                        <div class="font-mono text-xs text-slate-400">${formatCrypto(qty, symbol)}</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-mono font-semibold text-white text-sm">${formatUSD(valueUsd)}</div>
+                                    <button onclick="selectCoinForTrade('${symbol}', 'SELL')" class="text-[11px] text-rose-400 hover:text-rose-300 font-medium">
+                                        Sell &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderTransactionHistory() {
+            const tbody = document.getElementById('tx-history-body');
+            const badge = document.getElementById('tx-count-badge');
+            badge.textContent = state.transactions.length;
+
+            if (state.transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-xs text-slate-500">No deposits, withdrawals, or trades recorded yet.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const typeStyles = {
+                DEPOSIT: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                WITHDRAW: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                BUY: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+                SELL: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+            };
+
+            tbody.innerHTML = state.transactions.map(tx => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="py-3 pl-5 pr-3">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${typeStyles[tx.type] || ''}">
+                            ${tx.type}
+                        </span>
+                    </td>
+                    <td class="py-3 px-3">
+                        <div class="text-xs font-medium text-white">${tx.title}</div>
+                        <div class="text-[11px] text-slate-400">${tx.details}</div>
+                    </td>
+                    <td class="py-3 px-3 text-right font-mono text-xs font-semibold ${tx.isPositive ? 'text-emerald-400' : 'text-slate-200'}">
+                        ${tx.amountStr}
+                    </td>
+                    <td class="py-3 pl-3 pr-5 text-right font-mono text-[11px] text-slate-500">
+                        ${tx.timestamp}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function switchBottomTab(tab) {
+            const portBtn = document.getElementById('tab-btn-portfolio');
+            const histBtn = document.getElementById('tab-btn-history');
+            const portContent = document.getElementById('tab-content-portfolio');
+            const histContent = document.getElementById('tab-content-history');
+
+            if (tab === 'portfolio') {
+                portBtn.className = 'pb-3 text-sm font-medium border-b-2 border-indigo-500 text-white transition flex items-center gap-2';
+                histBtn.className = 'pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2';
+                portContent.classList.remove('hidden');
+                histContent.classList.add('hidden');
+            } else {
+                histBtn.className = 'pb-3 text-sm font-medium border-b-2 border-indigo-500 text-white transition flex items-center gap-2';
+                portBtn.className = 'pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2';
+                histContent.classList.remove('hidden');
+                portContent.classList.add('hidden');
+            }
+        }
+
+        function populateCoinDropdown() {
+            const select = document.getElementById('trade-coin-select');
+            select.innerHTML = COINS_DATA.map(c => 
+                `<option value="${c.symbol}">${c.name} (${c.symbol})</option>`
+            ).join('');
+            select.value = state.selectedCoinSymbol;
+        }
+
+        function renderAll(flashes = {}) {
+            renderHeaderAuth();
+            renderAccountBanner();
+            renderCoinsTable(flashes);
+            renderPortfolio();
+            renderTransactionHistory();
+            updateTradePanelUI();
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 9. SIMULATED LIVE MARKET TICKER
+        // ==========================================
+        function startLiveMarketSimulation() {
+            setInterval(() => {
+                const flashes = {};
+                // Randomly update 3-4 coins per tick for organic market feel
+                COINS_DATA.forEach(coin => {
+                    if (Math.random() > 0.55) {
+                        const pctMove = (Math.random() - 0.495) * 0.007; // slight realistic jitter
+                        const oldPrice = coin.price;
+                        coin.price = Math.max(0.01, coin.price * (1 + pctMove));
+                        coin.change24h += pctMove * 100;
+                        
+                        // Update sparkline tail
+                        coin.sparkline.shift();
+                        coin.sparkline.push(coin.price);
+
+                        flashes[coin.symbol] = coin.price >= oldPrice ? 'up' : 'down';
+                    }
+                });
+
+                const btc = COINS_DATA[0];
+                const headerTicker = document.getElementById('header-btc-ticker');
+                if (headerTicker) headerTicker.textContent = `BTC ${formatUSD(btc.price)}`;
+
+                renderCoinsTable(flashes);
+                if (state.user) {
+                    renderAccountBanner();
+                    renderPortfolio();
+                }
+                updateTradePanelUI();
+            }, 3000);
+        }
+
+        // ==========================================
+        // 10. INITIALIZATION
+        // ==========================================
+        document.getElementById('coin-search').addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            renderCoinsTable();
+        });
+
+        window.onload = function() {
+            populateCoinDropdown();
+            renderAll();
+            startLiveMarketSimulation();
+        };
+    </script>
+</body>
+</html>S
