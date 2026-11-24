@@ -105,18 +105,18 @@
         <!-- Account Summary Banner -->
         <section id="account-banner" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl"></section>
 
-        <!-- Pending Deposit Approvals Queue -->
-        <section id="pending-deposits-section" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-amber-500/30">
+        <!-- Deposit Confirmation Queue -->
+        <section id="pending-deposits-section" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-cyan-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div>
                     <h2 class="text-base font-bold text-white flex items-center gap-2">
-                        <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
-                        Deposit Approval Queue (Manual Approval Required)
+                        <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
+                        Deposit Confirmation Queue (Binance Payment Settlement)
                     </h2>
-                    <p class="text-xs text-slate-400">Binance deposits stay pending until approved. Balances update only after approval.</p>
+                    <p class="text-xs text-slate-400">Binance transfers are verified against your payment reference before crediting your available USD balance.</p>
                 </div>
-                <span id="pending-deposit-count" class="text-xs font-mono px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    0 Pending
+                <span id="pending-deposit-count" class="text-xs font-mono px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                    0 Awaiting Settlement
                 </span>
             </div>
             <div id="pending-deposits-list" class="space-y-2.5"></div>
@@ -129,18 +129,21 @@
                     <div class="flex items-center justify-between gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                             <i data-lucide="bell-ring" class="w-3.5 h-3.5"></i>
-                            Daily Unique Signal
+                            Daily Signal (5-Min Window)
                         </span>
                         <span id="signal-room-pill" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300">
                             Room: 0 / 5 Trades Used
                         </span>
                     </div>
                     <h2 class="text-lg font-bold text-white mb-1" id="daily-signal-title">Daily Signal</h2>
-                    <p class="text-xs text-slate-400 mb-3" id="daily-signal-times">
-                        Anchor: 19:00 IST (7:00 PM) • Local: --:--
+                    <p class="text-xs text-slate-400 mb-2" id="daily-signal-times">
+                        Anchor: 19:00 IST • 5-Min Window: 19:00–19:05 IST
                     </p>
-                    <p class="text-[11px] text-rose-300/90 bg-rose-950/40 border border-rose-500/25 rounded-lg px-2.5 py-1.5 mb-3">
-                        Limit: Only 5 signal trades allowed. Any trade after 5 loses 100% of the traded amount.
+                    <p id="daily-signal-status" class="text-xs font-medium text-cyan-300 mb-3">
+                        Daily Rule: 1 signal trade per day within the 5-minute window.
+                    </p>
+                    <p class="text-[11px] text-amber-200/90 bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1.5 mb-3">
+                        Room Cap: Only 5 signal trades allowed. Any trade after 5 forfeits 100% of the traded amount. Only 1 signal is traded per day within the 5-minute range.
                     </p>
                     <div class="grid grid-cols-3 gap-2 text-center mb-3">
                         <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
@@ -166,15 +169,15 @@
                     <label for="signal-region-select" class="text-slate-400">Signal Timezone:</label>
                     <select id="signal-region-select" onchange="updateDailySignalUI()"
                         class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500">
-                        <option value="IN">India (IST, UTC+5:30) — 19:00</option>
-                        <option value="ZW">Zimbabwe (CAT, UTC+2) — 15:30</option>
-                        <option value="ZA">South Africa (SAST, UTC+2) — 15:30</option>
-                        <option value="BW">Botswana (CAT, UTC+2) — 15:30</option>
-                        <option value="ZM">Zambia (CAT, UTC+2) — 15:30</option>
-                        <option value="TZ">Tanzania (EAT, UTC+3) — 16:30</option>
-                        <option value="FJ">Fiji (FJT, UTC+12) — 01:30 (+1d)</option>
-                        <option value="GB">UK (GMT, UTC+0) — 13:30</option>
-                        <option value="LU">Luxembourg (CET, UTC+1) — 14:30</option>
+                        <option value="IN">India (IST, UTC+5:30) — 19:00–19:05</option>
+                        <option value="ZW">Zimbabwe (CAT, UTC+2) — 15:30–15:35</option>
+                        <option value="ZA">South Africa (SAST, UTC+2) — 15:30–15:35</option>
+                        <option value="BW">Botswana (CAT, UTC+2) — 15:30–15:35</option>
+                        <option value="ZM">Zambia (CAT, UTC+2) — 15:30–15:35</option>
+                        <option value="TZ">Tanzania (EAT, UTC+3) — 16:30–16:35</option>
+                        <option value="FJ">Fiji (FJT, UTC+12) — 01:30–01:35 (+1d)</option>
+                        <option value="GB">UK (GMT, UTC+0) — 13:30–13:35</option>
+                        <option value="LU">Luxembourg (CET, UTC+1) — 14:30–14:35</option>
                     </select>
                 </div>
             </div>
@@ -429,8 +432,8 @@
                                 <span id="trade-est-coins" class="font-mono text-slate-200 font-medium">0.000000 BTC</span>
                             </div>
                             <div class="flex justify-between text-xs">
-                                <span class="text-slate-400">Signal Room Rule</span>
-                                <span class="font-mono text-amber-300">Max 5 trades; 6th+ loses all</span>
+                                <span class="text-slate-400">Signal Window & Cap</span>
+                                <span class="font-mono text-amber-300">1/day (5-min), max 5 trades</span>
                             </div>
                         </div>
 
@@ -445,10 +448,10 @@
                 <!-- Quick Funding Card -->
                 <div class="glass-panel rounded-2xl p-5 border border-slate-800/80">
                     <h4 class="text-sm font-semibold text-white mb-1">Binance USD Wallet ($10–$50)</h4>
-                    <p class="text-xs text-slate-400 mb-3">Deposits require approval before updating your USD balance.</p>
+                    <p class="text-xs text-slate-400 mb-3">Binance transfers are settled in the confirmation queue before crediting your USD balance.</p>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openWalletModal('DEPOSIT')" class="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Request Deposit
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Deposit USD
                         </button>
                         <button onclick="openWalletModal('WITHDRAW')" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center justify-center gap-1.5">
                             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Withdraw
@@ -500,7 +503,7 @@
                             <strong>Asset & Protocol Notice:</strong> All digital assets listed on CryptoNova (BTC, ETH, SOL, ADA, AVAX, DOT, LINK, LTC, POL, ATOM) are decentralized blockchain assets. Ticker symbols and names are used for identification only. CryptoNova is an independent platform and is not affiliated with, sponsored by, or endorsed by Binance or any asset foundation.
                         </p>
                         <p>
-                            <strong>Trading, Verification & Room Rules:</strong> Trading digital assets involves significant risk of loss, including total loss of funds traded beyond the 5-trade signal room limit. Deposits are accepted via Binance between $10.00 and $50.00 USD and take effect only upon approval. Registration is restricted to approved jurisdictions and requires valid email, passport details, and facial verification. Nothing on this site constitutes financial, investment, tax, or legal advice.
+                            <strong>Trading, Verification & Room Rules:</strong> Trading digital assets involves significant risk of loss. Only one signal trade is permitted per day within the 5-minute window, up to a 5-trade room limit; any trade beyond 5 forfeits 100% of the traded amount. Deposits are accepted via Binance between $10.00 and $50.00 USD and are credited upon confirmation. Registration is restricted to approved jurisdictions and requires valid email, passport details, and facial verification. Nothing on this site constitutes financial, investment, tax, or legal advice.
                         </p>
                     </div>
                 </div>
@@ -644,11 +647,11 @@
 
             <div class="flex flex-wrap items-center justify-between gap-2 pr-8 mb-1">
                 <h3 class="text-xl font-bold text-white">USD Wallet Management</h3>
-                <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-medium">
+                <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-medium">
                     Binance Only ($10–$50)
                 </span>
             </div>
-            <p class="text-xs text-slate-400 mb-5">Binance deposits ($10.00–$50.00) are queued for approval before updating your balance.</p>
+            <p class="text-xs text-slate-400 mb-5">Binance deposits ($10.00–$50.00) are settled through the confirmation queue before crediting your balance.</p>
 
             <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
                 <button type="button" id="wallet-tab-deposit" onclick="switchWalletTab('DEPOSIT')"
@@ -662,12 +665,12 @@
             </div>
 
             <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between mb-4">
-                <span class="text-xs text-slate-400">Approved USD Balance</span>
+                <span class="text-xs text-slate-400">Available USD Balance</span>
                 <span id="modal-usd-balance" class="font-mono font-bold text-white text-base">$0.00</span>
             </div>
 
             <form id="deposit-form" onsubmit="handleDepositSubmit(event)" class="space-y-4">
-                <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 flex items-center justify-between">
+                <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-200 flex items-center justify-between">
                     <span class="font-semibold">Payment Channel: Binance Only</span>
                     <span class="font-mono">Min $10 • Max $50</span>
                 </div>
@@ -675,7 +678,7 @@
                 <div>
                     <div class="flex justify-between text-xs mb-1.5">
                         <label class="font-medium text-slate-300">Deposit Amount (USD)</label>
-                        <span class="text-amber-400 font-medium">$10.00 Min – $50.00 Max</span>
+                        <span class="text-cyan-300 font-medium">$10.00 Min – $50.00 Max</span>
                     </div>
                     <div class="relative">
                         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono">$</span>
@@ -701,9 +704,9 @@
                     <span id="deposit-error-text">Deposit must be between $10.00 and $50.00 USD.</span>
                 </div>
 
-                <button type="submit" class="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
-                    <i data-lucide="clock" class="w-4 h-4"></i>
-                    <span>Submit Deposit For Approval</span>
+                <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span>Submit Binance Deposit For Settlement</span>
                 </button>
             </form>
 
@@ -770,7 +773,7 @@
             { id: 'cosmos', symbol: 'ATOM', name: 'Cosmos', price: 6.45, change24h: 1.34, mcap: '2.5B', spark: [6.25, 6.30, 6.28, 6.35, 6.39, 6.42, 6.45] }
         ];
 
-        const STORAGE_KEY = 'cryptonova_frontend_v4';
+        const STORAGE_KEY = 'cryptonova_frontend_v5';
 
         let state = loadState();
         let selectedCoinId = state.selectedCoinId || 'bitcoin';
@@ -796,6 +799,7 @@
                         referralCode: 'NOVA-DEMO01',
                         referralsCount: 0,
                         signalTradesCount: 0,
+                        lastSignalTradeDate: null,
                         usdBalance: 0,
                         holdings: {},
                         transactions: []
@@ -806,11 +810,11 @@
                 selectedCoinId: 'bitcoin',
                 reviews: [
                     { author: 'Aarav M.', rating: 5, comment: 'Daily signal changes each day and converts cleanly from 19:00 IST.', time: 'Today' },
-                    { author: 'Tariro K.', rating: 5, comment: 'Binance deposit approval and referral stage tracking work smoothly.', time: 'Yesterday' }
+                    { author: 'Tariro K.', rating: 5, comment: 'Binance deposit settlement and referral stage tracking work smoothly.', time: 'Yesterday' }
                 ],
                 queries: [],
                 chatHistory: [
-                    { sender: 'bot', text: 'Hi! Ask me anything about the platform, passport verification, Binance deposits, daily signals, referrals, or stages.' }
+                    { sender: 'bot', text: 'Hi! Ask me about allowed countries, passport & facial verification, Binance deposits ($10–$50), daily 5-minute signal windows, referrals, or stages.' }
                 ]
             };
         }
@@ -866,6 +870,17 @@
             return `${y}-${m}-${d}`;
         }
 
+        function getMinutesSinceMidnightIST() {
+            const nowIst = new Date(Date.now() + 330 * 60 * 1000);
+            return nowIst.getUTCHours() * 60 + nowIst.getUTCMinutes();
+        }
+
+        function isWithinDailyFiveMinuteSignalWindow() {
+            // Daily 5-minute window: 19:00 IST (1140 min) to 19:05 IST (1145 min)
+            const mins = getMinutesSinceMidnightIST();
+            return mins >= 1140 && mins <= 1145;
+        }
+
         function getDailySignalForDate(dateKey) {
             let hash = 0;
             for (let i = 0; i < dateKey.length; i++) {
@@ -886,10 +901,10 @@
             };
         }
 
-        function formatIstAnchorToRegion(regionCode) {
-            const utcMinutes = 19 * 60 - 330;
+        function formatIstMinutesToRegion(istMinutes, regionCode) {
+            const utcTotal = istMinutes - 330;
             const offset = COUNTRY_OFFSETS_MINUTES[regionCode] ?? 330;
-            let localTotal = utcMinutes + offset;
+            let localTotal = utcTotal + offset;
             let dayShift = 0;
             while (localTotal < 0) {
                 localTotal += 1440;
@@ -907,16 +922,32 @@
 
         function updateDailySignalUI() {
             const region = document.getElementById('signal-region-select')?.value || 'IN';
-            const convertedTime = formatIstAnchorToRegion(region);
+            const startLocal = formatIstMinutesToRegion(1140, region);
+            const endLocal = formatIstMinutesToRegion(1145, region);
             const dateKey = getDateKeyIST();
             const sig = getDailySignalForDate(dateKey);
             const user = getCurrentUser();
             const usedTrades = user ? Number(user.signalTradesCount || 0) : 0;
+            const tradedToday = Boolean(user && user.lastSignalTradeDate === dateKey);
+            const windowOpen = isWithinDailyFiveMinuteSignalWindow();
 
-            document.getElementById('header-signal-clock').textContent = `Signal ${convertedTime} (${region})`;
+            document.getElementById('header-signal-clock').textContent = `Signal ${startLocal}–${endLocal} (${region})`;
             document.getElementById('daily-signal-title').textContent = `${dateKey} • ${sig.coin.name} (${sig.coin.symbol})`;
             document.getElementById('daily-signal-times').textContent =
-                `Daily Anchor: 19:00 IST • Equivalent (${region}): ${convertedTime}`;
+                `Anchor: 19:00 IST • 5-Min Window (${region}): ${startLocal} – ${endLocal}`;
+
+            const statusEl = document.getElementById('daily-signal-status');
+            if (tradedToday) {
+                statusEl.textContent = `Today's 1 signal trade has already been recorded for ${dateKey}.`;
+                statusEl.className = 'text-xs font-medium text-emerald-400 mb-3';
+            } else if (windowOpen) {
+                statusEl.textContent = `5-minute signal window is active now. You may execute 1 signal trade today.`;
+                statusEl.className = 'text-xs font-medium text-emerald-400 mb-3';
+            } else {
+                statusEl.textContent = `Daily signal executes once per day within the 5-minute window (${startLocal} – ${endLocal} ${region}).`;
+                statusEl.className = 'text-xs font-medium text-cyan-300 mb-3';
+            }
+
             document.getElementById('signal-direction').textContent = sig.direction;
             document.getElementById('signal-direction').className =
                 `text-sm font-bold mt-0.5 ${sig.direction === 'LONG' ? 'text-emerald-400' : 'text-rose-400'}`;
@@ -926,7 +957,7 @@
                 `$${sig.targetPrice < 1 ? sig.targetPrice.toFixed(4) : sig.targetPrice.toFixed(2)}`;
 
             const roomText = usedTrades >= MAX_SIGNAL_ROOM_TRADES
-                ? `Room Full (${usedTrades}/${MAX_SIGNAL_ROOM_TRADES}) — Next trade loses all`
+                ? `Room Cap Reached (${usedTrades}/${MAX_SIGNAL_ROOM_TRADES})`
                 : `Room: ${usedTrades} / ${MAX_SIGNAL_ROOM_TRADES} Trades Used`;
             document.getElementById('signal-room-pill').textContent = roomText;
             document.getElementById('trade-room-badge').textContent = `${usedTrades} / ${MAX_SIGNAL_ROOM_TRADES} Trades`;
@@ -936,7 +967,7 @@
             const sig = getDailySignalForDate(getDateKeyIST());
             selectCoinForTrade(sig.coin.id);
             setTradeMode(sig.direction === 'LONG' ? 'BUY' : 'SELL');
-            showToast(`Loaded today's unique signal (${sig.coin.symbol} ${sig.direction}).`, 'info');
+            showToast(`Loaded today's signal (${sig.coin.symbol} ${sig.direction}).`, 'info');
         }
 
         function renderStagesAndReferrals() {
@@ -1017,10 +1048,10 @@
             const list = document.getElementById('pending-deposits-list');
             const badge = document.getElementById('pending-deposit-count');
             const pending = state.pendingDeposits || [];
-            badge.textContent = `${pending.length} Pending`;
+            badge.textContent = `${pending.length} Awaiting Settlement`;
 
             if (pending.length === 0) {
-                list.innerHTML = `<p class="text-xs text-slate-400">No pending Binance deposit requests waiting for approval.</p>`;
+                list.innerHTML = `<p class="text-xs text-slate-400">No Binance deposits awaiting settlement.</p>`;
                 return;
             }
 
@@ -1028,7 +1059,7 @@
                 <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="text-xs">
                         <div class="font-semibold text-white">
-                            ${req.userName} (${req.userEmail}) — <span class="font-mono text-amber-300">$${Number(req.amount).toFixed(2)} USD</span>
+                            ${req.userName} (${req.userEmail}) — <span class="font-mono text-cyan-300">$${Number(req.amount).toFixed(2)} USD</span>
                         </div>
                         <div class="text-slate-400 font-mono text-[11px] mt-0.5">
                             Binance Ref: ${req.binanceRef} • Submitted ${req.time}
@@ -1036,10 +1067,10 @@
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <button onclick="approveDeposit('${req.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">
-                            Approve
+                            Confirm Settlement
                         </button>
-                        <button onclick="rejectDeposit('${req.id}')" class="px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-500 text-xs font-semibold text-white transition">
-                            Reject
+                        <button onclick="rejectDeposit('${req.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition">
+                            Cancel
                         </button>
                     </div>
                 </div>
@@ -1055,7 +1086,7 @@
                 targetUser.usdBalance = Number((Number(targetUser.usdBalance || 0) + Number(req.amount)).toFixed(2));
                 targetUser.transactions.unshift({
                     type: 'DEPOSIT',
-                    details: `Binance Approved (${req.binanceRef})`,
+                    details: `Binance Settled (${req.binanceRef})`,
                     amountStr: `+$${Number(req.amount).toFixed(2)}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
@@ -1063,7 +1094,7 @@
             state.pendingDeposits.splice(idx, 1);
             saveState();
             renderAll();
-            showToast(`Approved $${Number(req.amount).toFixed(2)} deposit for ${req.userName}.`, 'success');
+            showToast(`Settled $${Number(req.amount).toFixed(2)} USD for ${req.userName}.`, 'success');
         }
 
         function rejectDeposit(reqId) {
@@ -1073,7 +1104,7 @@
             state.pendingDeposits.splice(idx, 1);
             saveState();
             renderAll();
-            showToast(`Rejected deposit request from ${req.userName}.`, 'info');
+            showToast(`Cancelled deposit request from ${req.userName}.`, 'info');
         }
 
         function renderSparkline(values, positive) {
@@ -1165,7 +1196,7 @@
             const badge = document.getElementById('tx-count-badge');
 
             if (!user) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400">Sign in to view your token holdings and approved USD balance.</p>`;
+                listEl.innerHTML = `<p class="text-xs text-slate-400">Sign in to view your token holdings and available USD balance.</p>`;
                 txBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-500">No transactions yet.</td></tr>`;
                 badge.textContent = '0';
                 return;
@@ -1174,10 +1205,10 @@
             const holdings = user.holdings || {};
             const rows = INITIAL_COINS.filter(c => (holdings[c.symbol] || 0) > 0);
             if (rows.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400">Approved Cash USD: <strong class="font-mono text-white">$${user.usdBalance.toFixed(2)}</strong>.</p>`;
+                listEl.innerHTML = `<p class="text-xs text-slate-400">Available Cash USD: <strong class="font-mono text-white">$${user.usdBalance.toFixed(2)}</strong>.</p>`;
             } else {
                 listEl.innerHTML = `
-                    <div class="mb-3 text-xs text-slate-400">Approved Cash USD: <span class="font-mono font-semibold text-white">$${user.usdBalance.toFixed(2)}</span></div>
+                    <div class="mb-3 text-xs text-slate-400">Available Cash USD: <span class="font-mono font-semibold text-white">$${user.usdBalance.toFixed(2)}</span></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         ${rows.map(c => {
                             const qty = holdings[c.symbol];
@@ -1267,7 +1298,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2.5 shrink-0">
                         <button onclick="openWalletModal('DEPOSIT')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">
-                            Request Binance Deposit
+                            Binance Deposit ($10–$50)
                         </button>
                         <button onclick="openWalletModal('WITHDRAW')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition">
                             Withdraw
@@ -1441,6 +1472,7 @@
                 referralCode: 'NOVA-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
                 referralsCount: 0,
                 signalTradesCount: 0,
+                lastSignalTradeDate: null,
                 usdBalance: 0,
                 holdings: {},
                 transactions: []
@@ -1545,7 +1577,7 @@
             saveState();
             closeWalletModal();
             renderAll();
-            showToast(`Deposit of $${amount.toFixed(2)} submitted. Balance updates after approval.`, 'info');
+            showToast(`Binance deposit of $${amount.toFixed(2)} added to settlement queue.`, 'info');
         }
 
         function handleWithdrawSubmit(e) {
@@ -1557,7 +1589,7 @@
             const errBox = document.getElementById('withdraw-error');
 
             if (Number.isNaN(amount) || amount <= 0 || amount > user.usdBalance) {
-                errBox.textContent = 'Invalid withdrawal amount or insufficient approved USD balance.';
+                errBox.textContent = 'Invalid withdrawal amount or insufficient available USD balance.';
                 errBox.classList.remove('hidden');
                 return;
             }
@@ -1666,29 +1698,47 @@
                 return;
             }
 
+            const todayKey = getDateKeyIST();
+            const sig = getDailySignalForDate(todayKey);
+            const isSignalTrade = coin.symbol === sig.coin.symbol;
+
+            if (isSignalTrade) {
+                if (!isWithinDailyFiveMinuteSignalWindow()) {
+                    showToast('Signal trades are only active during the daily 5-minute window (19:00–19:05 IST).', 'error');
+                    return;
+                }
+                if (user.lastSignalTradeDate === todayKey) {
+                    showToast('Only one signal is traded per day within the 5-minute window.', 'error');
+                    return;
+                }
+            }
+
             user.holdings = user.holdings || {};
             user.signalTradesCount = Number(user.signalTradesCount || 0);
-            const isOverRoomLimit = user.signalTradesCount >= MAX_SIGNAL_ROOM_TRADES;
+            const isOverRoomLimit = isSignalTrade && user.signalTradesCount >= MAX_SIGNAL_ROOM_TRADES;
 
             if (tradeMode === 'BUY') {
                 if (usdAmt > user.usdBalance) {
-                    showToast('Insufficient approved USD balance.', 'error');
+                    showToast('Insufficient available USD balance.', 'error');
                     return;
                 }
                 user.usdBalance = Number((user.usdBalance - usdAmt).toFixed(2));
-                user.signalTradesCount += 1;
+                if (isSignalTrade) {
+                    user.signalTradesCount += 1;
+                    user.lastSignalTradeDate = todayKey;
+                }
 
                 if (isOverRoomLimit) {
                     user.transactions.unshift({
                         type: 'TOTAL_LOSS',
-                        details: `Exceeded 5-trade room on ${coin.symbol} buy`,
+                        details: `Exceeded 5-trade room cap on ${coin.symbol} signal buy`,
                         amountStr: `-$${usdAmt.toFixed(2)}`,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     });
                     document.getElementById('trade-usd-input').value = '';
                     saveState();
                     renderAll();
-                    showToast(`5-trade limit reached! Lost all $${usdAmt.toFixed(2)} on this trade.`, 'error');
+                    showToast(`5-trade signal room cap reached. 100% of traded amount ($${usdAmt.toFixed(2)}) forfeited.`, 'error');
                     return;
                 }
 
@@ -1696,11 +1746,13 @@
                 user.holdings[coin.symbol] = Number(((user.holdings[coin.symbol] || 0) + coinQty).toFixed(8));
                 user.transactions.unshift({
                     type: 'BUY',
-                    details: `${coinQty.toFixed(6)} ${coin.symbol} (Trade ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`,
+                    details: isSignalTrade
+                        ? `${coinQty.toFixed(6)} ${coin.symbol} (Daily Signal ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`
+                        : `${coinQty.toFixed(6)} ${coin.symbol} (Spot)`,
                     amountStr: `-$${usdAmt.toFixed(2)}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
-                showToast(`Bought ${coinQty.toFixed(6)} ${coin.symbol} (${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES}).`, 'success');
+                showToast(`Bought ${coinQty.toFixed(6)} ${coin.symbol}.`, 'success');
             } else {
                 const owned = user.holdings[coin.symbol] || 0;
                 const coinQty = usdAmt / coin.price;
@@ -1709,30 +1761,35 @@
                     return;
                 }
                 user.holdings[coin.symbol] = Math.max(0, Number((owned - coinQty).toFixed(8)));
-                user.signalTradesCount += 1;
+                if (isSignalTrade) {
+                    user.signalTradesCount += 1;
+                    user.lastSignalTradeDate = todayKey;
+                }
 
                 if (isOverRoomLimit) {
                     user.transactions.unshift({
                         type: 'TOTAL_LOSS',
-                        details: `Exceeded 5-trade room on ${coin.symbol} sell`,
+                        details: `Exceeded 5-trade room cap on ${coin.symbol} signal sell`,
                         amountStr: `-${coinQty.toFixed(6)} ${coin.symbol}`,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     });
                     document.getElementById('trade-usd-input').value = '';
                     saveState();
                     renderAll();
-                    showToast(`5-trade limit reached! Traded amount lost on this trade.`, 'error');
+                    showToast(`5-trade signal room cap reached. 100% of traded amount forfeited.`, 'error');
                     return;
                 }
 
                 user.usdBalance = Number((user.usdBalance + usdAmt).toFixed(2));
                 user.transactions.unshift({
                     type: 'SELL',
-                    details: `${coinQty.toFixed(6)} ${coin.symbol} (Trade ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`,
+                    details: isSignalTrade
+                        ? `${coinQty.toFixed(6)} ${coin.symbol} (Daily Signal ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`
+                        : `${coinQty.toFixed(6)} ${coin.symbol} (Spot)`,
                     amountStr: `+$${usdAmt.toFixed(2)}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
-                showToast(`Sold ${coinQty.toFixed(6)} ${coin.symbol} (${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES}).`, 'success');
+                showToast(`Sold ${coinQty.toFixed(6)} ${coin.symbol}.`, 'success');
             }
 
             document.getElementById('trade-usd-input').value = '';
@@ -1830,11 +1887,11 @@
             if (text.includes('passport') || text.includes('verify') || text.includes('face')) {
                 return 'Registration requires a valid passport number (6–9 alphanumeric characters), unique email, allowed country, and facial verification.';
             }
-            if (text.includes('deposit') || text.includes('binance') || text.includes('approve')) {
-                return 'Deposits use Binance ($10.00–$50.00) and stay in the Deposit Approval Queue until approved before updating your balance.';
+            if (text.includes('deposit') || text.includes('binance') || text.includes('settle')) {
+                return 'Deposits use Binance ($10.00–$50.00) and are settled through the confirmation queue before crediting your USD balance.';
             }
-            if (text.includes('signal') || text.includes('room') || text.includes('lose') || text.includes('5')) {
-                return 'A fresh signal is generated daily at 19:00 IST (converted to your timezone). Each user has a 5-trade room; trading beyond 5 loses the traded amount.';
+            if (text.includes('signal') || text.includes('window') || text.includes('5') || text.includes('day')) {
+                return 'Only one signal is traded per day within the 5-minute window (19:00–19:05 IST, converted to your timezone), up to 5 signal trades total; any trade past 5 forfeits 100% of the traded amount.';
             }
             if (text.includes('stage') || text.includes('level') || text.includes('refer')) {
                 return 'Stages 1–5 advance automatically based on your referrals.';
