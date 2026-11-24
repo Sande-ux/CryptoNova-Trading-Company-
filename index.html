@@ -105,7 +105,24 @@
         <!-- Account Summary Banner -->
         <section id="account-banner" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl"></section>
 
-        <!-- Daily Signal (7:00 PM IST equivalent) + Level 1-5 & Referral Hub -->
+        <!-- Pending Deposit Approvals Queue (Approval Required Before Balance Updates) -->
+        <section id="pending-deposits-section" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-amber-500/30">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
+                        Deposit Approval Queue (Manual Approval Required)
+                    </h2>
+                    <p class="text-xs text-slate-400">Binance deposits stay pending until approved. Balances update only after approval.</p>
+                </div>
+                <span id="pending-deposit-count" class="text-xs font-mono px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                    0 Pending
+                </span>
+            </div>
+            <div id="pending-deposits-list" class="space-y-2.5"></div>
+        </section>
+
+        <!-- Daily Signal (Unique Daily + 19:00 IST Equivalent + 5-Trade Room) + Stages & Referrals -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Daily Signal Card -->
             <div class="lg:col-span-5 glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-indigo-500/30 flex flex-col justify-between">
@@ -113,30 +130,40 @@
                     <div class="flex items-center justify-between gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                             <i data-lucide="bell-ring" class="w-3.5 h-3.5"></i>
-                            Daily Signal (19:00 IST Base)
+                            Daily Unique Signal
                         </span>
-                        <span id="signal-status-pill" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-emerald-400">Synced</span>
+                        <span id="signal-room-pill" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300">
+                            Room: 0 / 5 Trades Used
+                        </span>
                     </div>
-                    <h2 class="text-lg font-bold text-white mb-1" id="daily-signal-title">BTC / USDT Daily Setup</h2>
-                    <p class="text-xs text-slate-400 mb-4" id="daily-signal-times">
-                        Anchor: 7:00 PM IST (UTC+5:30) • Your Local Time: --:--
+                    <h2 class="text-lg font-bold text-white mb-1" id="daily-signal-title">Daily Signal</h2>
+                    <p class="text-xs text-slate-400 mb-3" id="daily-signal-times">
+                        Anchor: 19:00 IST (7:00 PM) • Local: --:--
                     </p>
-                    <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                    <p class="text-[11px] text-rose-300/90 bg-rose-950/40 border border-rose-500/25 rounded-lg px-2.5 py-1.5 mb-3">
+                        Limit: Only 5 signal trades allowed. Any trade after 5 loses 100% of the traded amount.
+                    </p>
+                    <div class="grid grid-cols-3 gap-2 text-center mb-3">
                         <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
                             <div class="text-[10px] uppercase text-slate-400">Direction</div>
                             <div id="signal-direction" class="text-sm font-bold text-emerald-400 mt-0.5">LONG</div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-                            <div class="text-[10px] uppercase text-slate-400">Entry Zone</div>
-                            <div id="signal-entry" class="text-xs font-mono font-semibold text-white mt-1">$92,100</div>
+                            <div class="text-[10px] uppercase text-slate-400">Entry</div>
+                            <div id="signal-entry" class="text-xs font-mono font-semibold text-white mt-1">$0.00</div>
                         </div>
                         <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
                             <div class="text-[10px] uppercase text-slate-400">Target</div>
-                            <div id="signal-target" class="text-xs font-mono font-semibold text-cyan-300 mt-1">$94,800</div>
+                            <div id="signal-target" class="text-xs font-mono font-semibold text-cyan-300 mt-1">$0.00</div>
                         </div>
                     </div>
+                    <button type="button" onclick="useDailySignal()"
+                        class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                        Load Today's Signal Asset Into Trade Box
+                    </button>
                 </div>
-                <div class="flex items-center justify-between pt-3 border-t border-slate-800/80 text-xs">
+
+                <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80 text-xs">
                     <label for="signal-region-select" class="text-slate-400">Signal Timezone:</label>
                     <select id="signal-region-select" onchange="updateDailySignalUI()"
                         class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500">
@@ -153,38 +180,57 @@
                 </div>
             </div>
 
-            <!-- Level 1-5 Progression & Referral Section -->
-            <div class="lg:col-span-7 glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-700/70">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <div>
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i data-lucide="award" class="w-5 h-5 text-amber-400"></i>
-                            Stage Levels (1–5) & Referrals
-                        </h2>
-                        <p class="text-xs text-slate-400">Levels update automatically from your $10–$50 deposit tier and invited users.</p>
+            <!-- Stages Only (1-5) + Referrals -->
+            <div class="lg:col-span-7 glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-700/70 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
+                                Stages
+                            </h2>
+                            <p class="text-xs text-slate-400">Stages update automatically based on referrals.</p>
+                        </div>
+                        <span id="current-stage-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            Stage 1
+                        </span>
                     </div>
-                    <span id="current-level-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                        Level 1 • Starter
-                    </span>
+
+                    <!-- Stages 1 to 5 (Stages only) -->
+                    <div id="stages-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5"></div>
                 </div>
 
-                <!-- 5 Level Tiers Grid -->
-                <div id="levels-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4"></div>
+                <!-- Referrals Section -->
+                <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs font-semibold text-white flex items-center gap-1.5">
+                            <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+                            Referrals
+                        </span>
+                        <span id="referral-count-label" class="text-xs font-mono text-indigo-300">0 Referrals</span>
+                    </div>
 
-                <!-- Referral Link & Simulate Invite -->
-                <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <div class="text-[11px] text-slate-400">Your Referral Code & Link</div>
-                        <div id="referral-code-display" class="font-mono text-xs text-indigo-300 truncate mt-0.5">Sign in to view referral code</div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div id="referral-link-display" class="font-mono text-xs text-slate-300 truncate">
+                            Sign in to get your referral link
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="copyReferralLink()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition">
+                                Copy Link
+                            </button>
+                            <button type="button" onclick="addReferralUser()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                                Refer User
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" onclick="copyReferralLink()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition">
-                            Copy Link
+
+                    <form onsubmit="handleDirectReferralSubmit(event)" class="flex gap-2 pt-1">
+                        <input type="email" id="refer-friend-email" placeholder="Enter friend's email to refer..."
+                            class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white transition">
+                            Send Invite
                         </button>
-                        <button type="button" onclick="simulateReferralInvite()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
-                            + Log Invite
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </section>
@@ -302,11 +348,11 @@
                             <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i>
                             Send Us a Query (Email)
                         </h3>
-                        <p class="text-xs text-slate-400 mb-3">Questions about verification, Binance deposits, or agent onboarding.</p>
+                        <p class="text-xs text-slate-400 mb-3">Send questions or complex support requests directly to our team.</p>
                         <form onsubmit="handleQuerySubmit(event)" class="space-y-2.5">
                             <input type="email" id="query-email" required placeholder="Your email address"
                                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                            <input type="text" id="query-subject" required placeholder="Subject (e.g., Verification or Agent inquiry)"
+                            <input type="text" id="query-subject" required placeholder="Subject"
                                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                             <textarea id="query-message" rows="3" required placeholder="Write your question or message..."
                                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
@@ -328,7 +374,9 @@
                             <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-400"></i>
                             Spot Trade
                         </h3>
-                        <span class="text-xs px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium">0% Fee Promo</span>
+                        <span id="trade-room-badge" class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/20 font-medium">
+                            0 / 5 Trades
+                        </span>
                     </div>
 
                     <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
@@ -388,8 +436,8 @@
                                 <span id="trade-est-coins" class="font-mono text-slate-200 font-medium">0.000000 BTC</span>
                             </div>
                             <div class="flex justify-between text-xs">
-                                <span class="text-slate-400">Network / Execution Fee</span>
-                                <span class="font-mono text-emerald-400">$0.00 (Free)</span>
+                                <span class="text-slate-400">Signal Room Rule</span>
+                                <span class="font-mono text-amber-300">Max 5 trades; 6th+ loses all</span>
                             </div>
                         </div>
 
@@ -401,13 +449,13 @@
                     </div>
                 </div>
 
-                <!-- Quick Funding Card ($10 Min - $50 Max, Binance Only) -->
+                <!-- Quick Funding Card ($10 Min - $50 Max, Binance Only, Approval Required) -->
                 <div class="glass-panel rounded-2xl p-5 border border-slate-800/80">
                     <h4 class="text-sm font-semibold text-white mb-1">Binance USD Wallet ($10–$50)</h4>
-                    <p class="text-xs text-slate-400 mb-3">Deposit via Binance ($10.00 min, $50.00 max) or withdraw anytime.</p>
+                    <p class="text-xs text-slate-400 mb-3">Deposits require approval before updating your USD balance.</p>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openWalletModal('DEPOSIT')" class="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Deposit ($10–$50)
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Request Deposit
                         </button>
                         <button onclick="openWalletModal('WITHDRAW')" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center justify-center gap-1.5">
                             <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Withdraw
@@ -430,7 +478,7 @@
             <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i>
-                    <span class="text-xs font-semibold text-white">CryptoNova Help Assistant</span>
+                    <span class="text-xs font-semibold text-white">CryptoNova Help Chat</span>
                 </div>
                 <button onclick="toggleChatbot()" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-4 h-4"></i>
@@ -438,7 +486,7 @@
             </div>
             <div id="chatbot-messages" class="p-3.5 space-y-2.5 max-h-64 overflow-y-auto text-xs"></div>
             <form onsubmit="handleChatSubmit(event)" class="p-2.5 border-t border-slate-800 flex gap-2 bg-slate-950/70">
-                <input type="text" id="chatbot-input" placeholder="Ask about countries, verification, Binance, levels, signals..."
+                <input type="text" id="chatbot-input" placeholder="Ask anything..."
                     class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
                 <button type="submit" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white">
                     Send
@@ -459,7 +507,7 @@
                             <strong>Open-Source & Decentralized Asset Notice:</strong> All ten (10) digital assets listed on CryptoNova (BTC, ETH, SOL, ADA, AVAX, DOT, LINK, LTC, POL, ATOM) are decentralized, open-source blockchain protocols. This platform is an independent interface and is <strong>not affiliated with or endorsed by</strong> Binance or any cryptocurrency foundation.
                         </p>
                         <p>
-                            <strong>Verification & Financial Risk Notice:</strong> Browser facial capture and ID checks in this frontend demo provide local verification workflow simulation rather than regulated KYC biometric certification. Cryptocurrency trading carries risk; deposits are limited to $10.00–$50.00 USD.
+                            <strong>Verification & Financial Risk Notice:</strong> Passport validation checks format locally without government API verification, and browser facial checks provide local workflow verification. Cryptocurrency trading carries risk; deposits are limited to $10.00–$50.00 USD and require approval.
                         </p>
                     </div>
                 </div>
@@ -477,7 +525,7 @@
 
     <!-- ==================== MODALS ==================== -->
 
-    <!-- Auth Modal (Login / Register with Country Allowlist, ID & Facial Verification, Agent Option) -->
+    <!-- Auth Modal (Login / Register with Valid Passport, Country Allowlist, Facial Verification, Agent Option) -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
@@ -534,13 +582,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Valid Passport or National ID Number</label>
-                        <input type="text" id="auth-id-number" placeholder="e.g., 63-123456A78 or Passport No."
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Valid Passport Number (6–9 Alphanumeric Chars)</label>
+                        <input type="text" id="auth-passport" placeholder="e.g., Z1234567 or P12345678"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono uppercase text-white focus:outline-none focus:border-indigo-500">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Upload ID / Passport Photo (Optional File)</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Upload Passport Scan / Photo (Optional)</label>
                         <input type="file" id="auth-id-file" accept="image/*,.pdf"
                             class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-white">
                     </div>
@@ -607,7 +655,7 @@
                     Binance Only ($10–$50)
                 </span>
             </div>
-            <p class="text-xs text-slate-400 mb-5">Deposits are accepted via Binance only, with a $10.00 minimum and $50.00 maximum.</p>
+            <p class="text-xs text-slate-400 mb-5">Binance deposits ($10.00–$50.00) are queued for approval before updating your balance.</p>
 
             <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 mb-5">
                 <button type="button" id="wallet-tab-deposit" onclick="switchWalletTab('DEPOSIT')"
@@ -621,14 +669,14 @@
             </div>
 
             <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between mb-4">
-                <span class="text-xs text-slate-400">Available USD Balance</span>
+                <span class="text-xs text-slate-400">Approved USD Balance</span>
                 <span id="modal-usd-balance" class="font-mono font-bold text-white text-base">$0.00</span>
             </div>
 
-            <!-- Deposit Form (Binance Only, $10 Min - $50 Max) -->
+            <!-- Deposit Form (Binance Only, $10 Min - $50 Max, Requires Approval) -->
             <form id="deposit-form" onsubmit="handleDepositSubmit(event)" class="space-y-4">
                 <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 flex items-center justify-between">
-                    <span class="font-semibold">Payment Channel: Binance Pay / Binance Transfer</span>
+                    <span class="font-semibold">Payment Channel: Binance Only</span>
                     <span class="font-mono">Min $10 • Max $50</span>
                 </div>
 
@@ -661,9 +709,9 @@
                     <span id="deposit-error-text">Deposit must be between $10.00 and $50.00 USD.</span>
                 </div>
 
-                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i>
-                    <span>Confirm Binance Deposit</span>
+                <button type="submit" class="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <span>Submit Deposit For Approval</span>
                 </button>
             </form>
 
@@ -697,24 +745,27 @@
         ];
 
         const COUNTRY_OFFSETS_MINUTES = {
-            IN: 330,   // UTC+5:30 (19:00 IST anchor)
+            IN: 330,   // UTC+5:30 -> 19:00
             ZW: 120,   // UTC+2 -> 15:30
             ZA: 120,   // UTC+2 -> 15:30
             BW: 120,   // UTC+2 -> 15:30
             ZM: 120,   // UTC+2 -> 15:30
             TZ: 180,   // UTC+3 -> 16:30
-            FJ: 720,   // UTC+12 -> 01:30 next day
+            FJ: 720,   // UTC+12 -> 01:30 (+1d)
             GB: 0,     // UTC+0 -> 13:30
             LU: 60     // UTC+1 -> 14:30
         };
 
-        const LEVEL_TIERS = [
-            { level: 1, name: 'Starter', minDeposit: 10, minInvites: 0, multLabel: '1.0x' },
-            { level: 2, name: 'Builder', minDeposit: 20, minInvites: 1, multLabel: '1.2x' },
-            { level: 3, name: 'Accelerator', minDeposit: 30, minInvites: 3, multLabel: '1.5x' },
-            { level: 4, name: 'Strategist', minDeposit: 40, minInvites: 6, multLabel: '1.8x' },
-            { level: 5, name: 'Prime', minDeposit: 50, minInvites: 10, multLabel: '2.2x' }
+        // Stage updates automatically based on referrals count
+        const STAGE_DEFS = [
+            { stage: 1, minReferrals: 0 },
+            { stage: 2, minReferrals: 1 },
+            { stage: 3, minReferrals: 3 },
+            { stage: 4, minReferrals: 6 },
+            { stage: 5, minReferrals: 10 }
         ];
+
+        const MAX_SIGNAL_ROOM_TRADES = 5;
 
         const INITIAL_COINS = [
             { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', price: 92450.00, change24h: 2.45, mcap: '1.82T', spark: [89200, 90100, 89800, 91200, 91900, 92150, 92450] },
@@ -729,7 +780,7 @@
             { id: 'cosmos', symbol: 'ATOM', name: 'Cosmos', price: 6.45, change24h: 1.34, mcap: '2.5B', spark: [6.25, 6.30, 6.28, 6.35, 6.39, 6.42, 6.45] }
         ];
 
-        const STORAGE_KEY = 'cryptonova_state_v2';
+        const STORAGE_KEY = 'cryptonova_state_v3';
 
         let state = loadState();
         let selectedCoinId = state.selectedCoinId || 'bitcoin';
@@ -750,25 +801,26 @@
                         password: 'demo',
                         country: 'India',
                         role: 'USER',
-                        idNumber: 'PASS-994821',
+                        passportNumber: 'A1234567',
                         faceVerified: true,
                         referralCode: 'NOVA-DEMO01',
-                        invitesCount: 1,
-                        totalDeposited: 10,
-                        usdBalance: 10,
+                        referralsCount: 0,
+                        signalTradesCount: 0,
+                        usdBalance: 0,
                         holdings: {},
                         transactions: []
                     }
                 ],
+                pendingDeposits: [],
                 currentUserId: null,
                 selectedCoinId: 'bitcoin',
                 reviews: [
-                    { author: 'Aarav M.', rating: 5, comment: 'Daily 7 PM IST signal timing converts cleanly to my local schedule.', time: 'Today' },
-                    { author: 'Tariro K.', rating: 5, comment: 'Binance deposits between $10 and $50 are straightforward and clear.', time: 'Yesterday' }
+                    { author: 'Aarav M.', rating: 5, comment: 'Daily signal changes each day and converts cleanly from 19:00 IST.', time: 'Today' },
+                    { author: 'Tariro K.', rating: 5, comment: 'Binance deposit approval and referral stage tracking work smoothly.', time: 'Yesterday' }
                 ],
                 queries: [],
                 chatHistory: [
-                    { sender: 'bot', text: 'Hi! Ask me about allowed countries, ID/facial verification, Binance ($10–$50) deposits, Level 1–5 invites, or the daily 7:00 PM IST signal.' }
+                    { sender: 'bot', text: 'Hi! Ask me anything about the platform, passport verification, Binance deposits, daily signals, referrals, or stages.' }
                 ]
             };
         }
@@ -793,19 +845,14 @@
             return state.users.find(u => u.id === state.currentUserId) || null;
         }
 
-        function computeUserLevel(user) {
-            if (!user) return LEVEL_TIERS[0];
-            const dep = Number(user.totalDeposited || 0);
-            const inv = Number(user.invitesCount || 0);
-            let unlocked = LEVEL_TIERS[0];
-            for (const tier of LEVEL_TIERS) {
-                const depMatch = dep >= tier.minDeposit;
-                const invMatch = inv >= tier.minInvites;
-                if ((depMatch && invMatch) || (tier.level === 2 && (dep >= 20 || inv >= 1)) || (tier.level === 3 && dep >= 30 && inv >= 2) || (tier.level === 4 && dep >= 40 && inv >= 5) || (tier.level === 5 && dep >= 50 && inv >= 8)) {
-                    unlocked = tier;
-                }
+        // Stage updates automatically based on referrals only
+        function computeUserStage(user) {
+            const refs = user ? Number(user.referralsCount || 0) : 0;
+            let currentStage = 1;
+            for (const s of STAGE_DEFS) {
+                if (refs >= s.minReferrals) currentStage = s.stage;
             }
-            return unlocked;
+            return currentStage;
         }
 
         function showToast(message, type = 'info') {
@@ -819,13 +866,42 @@
             el.className = `px-4 py-3 rounded-xl border text-xs font-medium shadow-xl backdrop-blur-md transition ${colors[type] || colors.info}`;
             el.textContent = message;
             container.appendChild(el);
-            setTimeout(() => el.remove(), 3200);
+            setTimeout(() => el.remove(), 3400);
         }
 
-        // ==================== DAILY SIGNAL (7:00 PM IST CONVERSION) ====================
+        // ==================== UNIQUE DAILY SIGNAL + 19:00 IST CONVERSION ====================
+        function getDateKeyIST() {
+            // Current time in IST (UTC+5:30)
+            const nowIst = new Date(Date.now() + 330 * 60 * 1000);
+            const y = nowIst.getUTCFullYear();
+            const m = String(nowIst.getUTCMonth() + 1).padStart(2, '0');
+            const d = String(nowIst.getUTCDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getDailySignalForDate(dateKey) {
+            // Deterministic per-day hash so each new day produces a different signal
+            let hash = 0;
+            for (let i = 0; i < dateKey.length; i++) {
+                hash = ((hash << 5) - hash + dateKey.charCodeAt(i) * (i + 7)) | 0;
+            }
+            const positiveHash = Math.abs(hash);
+            const coin = INITIAL_COINS[positiveHash % INITIAL_COINS.length];
+            const isLong = positiveHash % 2 === 0;
+            const entryMult = isLong ? 0.992 : 1.008;
+            const targetMult = isLong ? 1.028 : 0.972;
+
+            return {
+                dateKey,
+                coin,
+                direction: isLong ? 'LONG' : 'SHORT',
+                entryPrice: coin.price * entryMult,
+                targetPrice: coin.price * targetMult
+            };
+        }
+
         function formatIstAnchorToRegion(regionCode) {
-            // 19:00 IST (19*60 = 1140 min) in UTC minutes = 1140 - 330 = 810 min (13:30 UTC)
-            const utcMinutes = 19 * 60 - 330;
+            const utcMinutes = 19 * 60 - 330; // 19:00 IST = 13:30 UTC
             const offset = COUNTRY_OFFSETS_MINUTES[regionCode] ?? 330;
             let localTotal = utcMinutes + offset;
             let dayShift = 0;
@@ -844,52 +920,69 @@
         }
 
         function updateDailySignalUI() {
-            const select = document.getElementById('signal-region-select');
-            const region = select ? select.value : 'IN';
+            const region = document.getElementById('signal-region-select')?.value || 'IN';
             const convertedTime = formatIstAnchorToRegion(region);
-            const btc = INITIAL_COINS[0];
-            const levelTier = computeUserLevel(getCurrentUser());
+            const dateKey = getDateKeyIST();
+            const sig = getDailySignalForDate(dateKey);
+            const user = getCurrentUser();
+            const usedTrades = user ? Number(user.signalTradesCount || 0) : 0;
 
             document.getElementById('header-signal-clock').textContent = `Signal ${convertedTime} (${region})`;
-            document.getElementById('daily-signal-title').textContent = `${btc.symbol}/USDT Daily Signal (${levelTier.multLabel} Stage Boost)`;
+            document.getElementById('daily-signal-title').textContent = `${dateKey} • ${sig.coin.name} (${sig.coin.symbol})`;
             document.getElementById('daily-signal-times').textContent =
-                `Daily Anchor: 19:00 IST (7:00 PM) • Equivalent Time (${region}): ${convertedTime}`;
-            document.getElementById('signal-direction').textContent = btc.change24h >= 0 ? 'LONG' : 'WATCH / BUY DIP';
-            document.getElementById('signal-entry').textContent = `$${(btc.price * 0.996).toFixed(2)}`;
-            document.getElementById('signal-target').textContent = `$${(btc.price * (1.02 + (levelTier.level - 1) * 0.005)).toFixed(2)}`;
+                `Daily Anchor: 19:00 IST • Equivalent (${region}): ${convertedTime}`;
+            document.getElementById('signal-direction').textContent = sig.direction;
+            document.getElementById('signal-direction').className =
+                `text-sm font-bold mt-0.5 ${sig.direction === 'LONG' ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.getElementById('signal-entry').textContent =
+                `$${sig.entryPrice < 1 ? sig.entryPrice.toFixed(4) : sig.entryPrice.toFixed(2)}`;
+            document.getElementById('signal-target').textContent =
+                `$${sig.targetPrice < 1 ? sig.targetPrice.toFixed(4) : sig.targetPrice.toFixed(2)}`;
+
+            const roomText = usedTrades >= MAX_SIGNAL_ROOM_TRADES
+                ? `Room Full (${usedTrades}/${MAX_SIGNAL_ROOM_TRADES}) — Next trade loses all`
+                : `Room: ${usedTrades} / ${MAX_SIGNAL_ROOM_TRADES} Trades Used`;
+            document.getElementById('signal-room-pill').textContent = roomText;
+            document.getElementById('trade-room-badge').textContent = `${usedTrades} / ${MAX_SIGNAL_ROOM_TRADES} Trades`;
         }
 
-        // ==================== LEVELS 1-5 & REFERRALS ====================
-        function renderLevelsAndReferrals() {
+        function useDailySignal() {
+            const sig = getDailySignalForDate(getDateKeyIST());
+            selectCoinForTrade(sig.coin.id);
+            setTradeMode(sig.direction === 'LONG' ? 'BUY' : 'SELL');
+            showToast(`Loaded today's unique signal (${sig.coin.symbol} ${sig.direction}).`, 'info');
+        }
+
+        // ==================== STAGES ONLY (1-5) & REFERRALS ====================
+        function renderStagesAndReferrals() {
             const user = getCurrentUser();
-            const currentTier = computeUserLevel(user);
-            const invites = user ? (user.invitesCount || 0) : 0;
-            const deposited = user ? (user.totalDeposited || 0) : 0;
+            const currentStage = computeUserStage(user);
+            const referralsCount = user ? Number(user.referralsCount || 0) : 0;
 
-            document.getElementById('current-level-badge').textContent =
-                `Level ${currentTier.level} • ${currentTier.name} (${invites} invites, $${deposited.toFixed(0)} dep)`;
+            document.getElementById('current-stage-badge').textContent = `Stage ${currentStage}`;
+            document.getElementById('referral-count-label').textContent = `${referralsCount} Referrals`;
 
-            const grid = document.getElementById('levels-grid');
-            grid.innerHTML = LEVEL_TIERS.map(tier => {
-                const active = tier.level === currentTier.level;
-                const unlocked = tier.level <= currentTier.level;
+            document.getElementById('stages-grid').innerHTML = STAGE_DEFS.map(s => {
+                const isCurrent = s.stage === currentStage;
+                const isReached = s.stage <= currentStage;
                 return `
-                    <div class="p-2.5 rounded-xl border text-left ${active ? 'bg-indigo-600/20 border-indigo-400' : unlocked ? 'bg-slate-900/90 border-emerald-500/40' : 'bg-slate-950/60 border-slate-800'}">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-white">Lv ${tier.level}</span>
-                            <span class="text-[10px] font-mono text-indigo-300">${tier.multLabel}</span>
-                        </div>
-                        <div class="text-[11px] text-slate-300 font-medium mt-0.5">${tier.name}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">Dep $${tier.minDeposit}+ • ${tier.minInvites} inv</div>
+                    <div class="p-3 rounded-xl border text-center ${
+                        isCurrent
+                            ? 'bg-indigo-600/20 border-indigo-400'
+                            : isReached
+                                ? 'bg-slate-900/90 border-emerald-500/40'
+                                : 'bg-slate-950/60 border-slate-800'
+                    }">
+                        <div class="text-xs font-bold text-white">Stage ${s.stage}</div>
                     </div>
                 `;
             }).join('');
 
-            const refEl = document.getElementById('referral-code-display');
+            const linkEl = document.getElementById('referral-link-display');
             if (user) {
-                refEl.textContent = `Code: ${user.referralCode} • ?ref=${user.referralCode}`;
+                linkEl.textContent = `${window.location.href.split('?')[0]}?ref=${user.referralCode}`;
             } else {
-                refEl.textContent = 'Sign in to view your referral code & invite link';
+                linkEl.textContent = 'Sign in to get your referral link';
             }
         }
 
@@ -901,26 +994,102 @@
             }
             const url = `${window.location.href.split('?')[0]}?ref=${user.referralCode}`;
             navigator.clipboard?.writeText(url).catch(() => {});
-            showToast(`Referral link copied: ${url}`, 'success');
+            showToast('Referral link copied.', 'success');
         }
 
-        function simulateReferralInvite() {
+        function addReferralUser(invitedLabel = '') {
             const user = getCurrentUser();
             if (!user) {
                 openAuthModal('LOGIN');
                 return;
             }
-            user.invitesCount = Number(user.invitesCount || 0) + 1;
-            const nextTier = computeUserLevel(user);
+            user.referralsCount = Number(user.referralsCount || 0) + 1;
+            const newStage = computeUserStage(user);
             user.transactions.unshift({
                 type: 'REFERRAL',
-                details: `Invited user #${user.invitesCount} (Now Level ${nextTier.level})`,
-                amountStr: `${user.invitesCount} Invites`,
+                details: invitedLabel ? `Referred ${invitedLabel}` : `Referral #${user.referralsCount}`,
+                amountStr: `Stage ${newStage}`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
             saveState();
             renderAll();
-            showToast(`Invite recorded! You are now Level ${nextTier.level} (${nextTier.name}).`, 'success');
+            showToast(`Referral added! Automatically updated to Stage ${newStage}.`, 'success');
+        }
+
+        function handleDirectReferralSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('refer-friend-email');
+            const email = input.value.trim();
+            if (!isValidEmail(email)) {
+                showToast('Enter a valid email address to refer.', 'error');
+                return;
+            }
+            input.value = '';
+            addReferralUser(email);
+        }
+
+        // ==================== PENDING DEPOSIT APPROVALS ====================
+        function renderPendingDeposits() {
+            const list = document.getElementById('pending-deposits-list');
+            const badge = document.getElementById('pending-deposit-count');
+            const pending = state.pendingDeposits || [];
+            badge.textContent = `${pending.length} Pending`;
+
+            if (pending.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400">No pending Binance deposit requests waiting for approval.</p>`;
+                return;
+            }
+
+            list.innerHTML = pending.map(req => `
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="text-xs">
+                        <div class="font-semibold text-white">
+                            ${req.userName} (${req.userEmail}) — <span class="font-mono text-amber-300">$${Number(req.amount).toFixed(2)} USD</span>
+                        </div>
+                        <div class="text-slate-400 font-mono text-[11px] mt-0.5">
+                            Binance Ref: ${req.binanceRef} • Submitted ${req.time}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="approveDeposit('${req.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">
+                            Approve
+                        </button>
+                        <button onclick="rejectDeposit('${req.id}')" class="px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-500 text-xs font-semibold text-white transition">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveDeposit(reqId) {
+            const idx = (state.pendingDeposits || []).findIndex(d => d.id === reqId);
+            if (idx === -1) return;
+            const req = state.pendingDeposits[idx];
+            const targetUser = state.users.find(u => u.id === req.userId);
+            if (targetUser) {
+                targetUser.usdBalance = Number((Number(targetUser.usdBalance || 0) + Number(req.amount)).toFixed(2));
+                targetUser.transactions.unshift({
+                    type: 'DEPOSIT',
+                    details: `Binance Approved (${req.binanceRef})`,
+                    amountStr: `+$${Number(req.amount).toFixed(2)}`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+            }
+            state.pendingDeposits.splice(idx, 1);
+            saveState();
+            renderAll();
+            showToast(`Approved $${Number(req.amount).toFixed(2)} deposit for ${req.userName}.`, 'success');
+        }
+
+        function rejectDeposit(reqId) {
+            const idx = (state.pendingDeposits || []).findIndex(d => d.id === reqId);
+            if (idx === -1) return;
+            const req = state.pendingDeposits[idx];
+            state.pendingDeposits.splice(idx, 1);
+            saveState();
+            renderAll();
+            showToast(`Rejected deposit request from ${req.userName}.`, 'info');
         }
 
         // ==================== MARKET TABLE & SPARKLINES ====================
@@ -1014,7 +1183,7 @@
             const badge = document.getElementById('tx-count-badge');
 
             if (!user) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400">Sign in to view your token holdings and wallet balance.</p>`;
+                listEl.innerHTML = `<p class="text-xs text-slate-400">Sign in to view your token holdings and approved USD balance.</p>`;
                 txBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-500">No transactions yet.</td></tr>`;
                 badge.textContent = '0';
                 return;
@@ -1023,10 +1192,10 @@
             const holdings = user.holdings || {};
             const rows = INITIAL_COINS.filter(c => (holdings[c.symbol] || 0) > 0);
             if (rows.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-400">Cash USD: <strong class="font-mono text-white">$${user.usdBalance.toFixed(2)}</strong>. Buy any of the 10 curated assets on the right.</p>`;
+                listEl.innerHTML = `<p class="text-xs text-slate-400">Approved Cash USD: <strong class="font-mono text-white">$${user.usdBalance.toFixed(2)}</strong>.</p>`;
             } else {
                 listEl.innerHTML = `
-                    <div class="mb-3 text-xs text-slate-400">Cash USD: <span class="font-mono font-semibold text-white">$${user.usdBalance.toFixed(2)}</span></div>
+                    <div class="mb-3 text-xs text-slate-400">Approved Cash USD: <span class="font-mono font-semibold text-white">$${user.usdBalance.toFixed(2)}</span></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         ${rows.map(c => {
                             const qty = holdings[c.symbol];
@@ -1077,7 +1246,7 @@
                         <div>
                             <h1 class="text-xl font-bold text-white">Welcome to CryptoNova</h1>
                             <p class="text-xs text-slate-400 mt-1">
-                                Registration is open for Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg with ID & facial verification. Binance deposits range from $10.00 to $50.00 USD.
+                                Allowed countries: Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg. Valid passport & facial verification required at registration.
                             </p>
                         </div>
                         <div class="flex gap-2.5 shrink-0">
@@ -1093,7 +1262,7 @@
                 return;
             }
 
-            const tier = computeUserLevel(user);
+            const stage = computeUserStage(user);
             nav.innerHTML = `
                 <span class="hidden sm:inline-block text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
                     $${user.usdBalance.toFixed(2)}
@@ -1108,16 +1277,16 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="text-lg font-bold text-white">${user.name}</span>
                             <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">${user.country}</span>
-                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">${user.role === 'AGENT' ? 'Verified Agent' : 'Verified Member'}</span>
-                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Level ${tier.level} (${tier.name})</span>
+                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">${user.role === 'AGENT' ? 'Agent' : 'User'}</span>
+                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Stage ${stage}</span>
                         </div>
                         <p class="text-xs text-slate-400">
-                            Email: <span class="text-slate-200">${user.email}</span> • ID: <span class="font-mono text-slate-200">${user.idNumber}</span> • Total Deposited: <span class="font-mono text-emerald-400">$${Number(user.totalDeposited || 0).toFixed(2)}</span> • Invites: <span class="font-mono text-white">${user.invitesCount || 0}</span>
+                            Email: <span class="text-slate-200">${user.email}</span> • Passport: <span class="font-mono text-slate-200">${user.passportNumber}</span> • Referrals: <span class="font-mono text-white">${user.referralsCount || 0}</span> • Signal Trades: <span class="font-mono text-amber-300">${user.signalTradesCount || 0}/${MAX_SIGNAL_ROOM_TRADES}</span>
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2.5 shrink-0">
                         <button onclick="openWalletModal('DEPOSIT')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">
-                            Deposit Binance ($10–$50)
+                            Request Binance Deposit
                         </button>
                         <button onclick="openWalletModal('WITHDRAW')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition">
                             Withdraw
@@ -1127,7 +1296,7 @@
             `;
         }
 
-        // ==================== AUTH, COUNTRY ALLOWLIST & FACIAL VERIFICATION ====================
+        // ==================== AUTH, VALID PASSPORT, COUNTRY ALLOWLIST & FACIAL VERIFICATION ====================
         function openAuthModal(mode = 'LOGIN') {
             switchAuthMode(mode);
             const modal = document.getElementById('auth-modal');
@@ -1162,7 +1331,7 @@
             const video = document.getElementById('face-video');
             const status = document.getElementById('face-verify-status');
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                status.textContent = 'Camera API unavailable in this browser; click "Capture & Verify Face" to complete simulated check.';
+                status.textContent = 'Camera unavailable in this browser; click "Capture & Verify Face" to complete check.';
                 return;
             }
             try {
@@ -1171,7 +1340,7 @@
                 video.classList.remove('hidden');
                 status.textContent = 'Camera active. Align your face and click "Capture & Verify Face".';
             } catch {
-                status.textContent = 'Camera permission denied or unavailable; click "Capture & Verify Face" to run verification check.';
+                status.textContent = 'Camera permission denied or unavailable; click "Capture & Verify Face" to complete check.';
             }
         }
 
@@ -1200,8 +1369,8 @@
             faceVerified = true;
             document.getElementById('face-verify-badge').className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
             document.getElementById('face-verify-badge').textContent = 'Verified';
-            document.getElementById('face-verify-status').textContent = 'Facial verification completed and matched.';
-            showToast('Facial verification check passed.', 'success');
+            document.getElementById('face-verify-status').textContent = 'Facial verification completed.';
+            showToast('Facial verification completed.', 'success');
         }
 
         function showAuthError(msg) {
@@ -1212,6 +1381,14 @@
 
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(email || '').trim());
+        }
+
+        function isValidPassportNumber(passport) {
+            // Standard alphanumeric passport format (6-9 chars, not all identical digits/letters)
+            const cleaned = String(passport || '').trim().toUpperCase();
+            if (!/^[A-Z0-9]{6,9}$/.test(cleaned)) return false;
+            if (/^(.)\1+$/.test(cleaned)) return false;
+            return true;
         }
 
         function handleAuthSubmit(e) {
@@ -1238,26 +1415,25 @@
                 return;
             }
 
-            // REGISTER + VERIFICATION
             const name = document.getElementById('auth-name').value.trim();
             const country = document.getElementById('auth-country').value;
             const role = document.getElementById('auth-role').value;
-            const idNumber = document.getElementById('auth-id-number').value.trim();
+            const passportNumber = document.getElementById('auth-passport').value.trim().toUpperCase();
 
             if (!name) {
                 showAuthError('Please enter your full name.');
                 return;
             }
             if (!ALLOWED_COUNTRIES.includes(country)) {
-                showAuthError('Registration is restricted to: Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg.');
+                showAuthError('Only Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg are allowed to register.');
                 return;
             }
             if (state.users.some(u => u.email.toLowerCase() === email)) {
-                showAuthError('This email address is already registered and cannot be used again.');
+                showAuthError('This email is already in use and cannot be registered again.');
                 return;
             }
-            if (!idNumber || idNumber.length < 4) {
-                showAuthError('Please enter a valid Passport or National ID number.');
+            if (!isValidPassportNumber(passportNumber)) {
+                showAuthError('Please enter a valid passport number (6 to 9 letters/numbers, e.g., A1234567).');
                 return;
             }
             if (!faceVerified) {
@@ -1270,7 +1446,7 @@
             if (refParam) {
                 const referrer = state.users.find(u => u.referralCode === refParam);
                 if (referrer) {
-                    referrer.invitesCount = Number(referrer.invitesCount || 0) + 1;
+                    referrer.referralsCount = Number(referrer.referralsCount || 0) + 1;
                 }
             }
 
@@ -1281,11 +1457,11 @@
                 password,
                 country,
                 role,
-                idNumber,
+                passportNumber,
                 faceVerified: true,
                 referralCode: 'NOVA-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
-                invitesCount: 0,
-                totalDeposited: 0,
+                referralsCount: 0,
+                signalTradesCount: 0,
                 usdBalance: 0,
                 holdings: {},
                 transactions: []
@@ -1297,7 +1473,7 @@
             saveState();
             closeAuthModal();
             renderAll();
-            showToast(`Account created and verified (${role === 'AGENT' ? 'Agent' : 'User'}).`, 'success');
+            showToast(`Verified account registered as ${role === 'AGENT' ? 'Agent' : 'User'}.`, 'success');
         }
 
         function quickDemoLogin() {
@@ -1315,7 +1491,7 @@
             showToast('Logged out.', 'info');
         }
 
-        // ==================== WALLET (BINANCE ONLY, $10 MIN - $50 MAX) ====================
+        // ==================== WALLET (BINANCE ONLY, $10 MIN - $50 MAX, APPROVAL REQUIRED) ====================
         function openWalletModal(tab = 'DEPOSIT') {
             if (!getCurrentUser()) {
                 openAuthModal('LOGIN');
@@ -1376,14 +1552,14 @@
             }
 
             errBox.classList.add('hidden');
-            user.usdBalance = Number((user.usdBalance + amount).toFixed(2));
-            user.totalDeposited = Number(((user.totalDeposited || 0) + amount).toFixed(2));
-            const newTier = computeUserLevel(user);
-
-            user.transactions.unshift({
-                type: 'DEPOSIT',
-                details: `Binance (${ref}) • Level ${newTier.level}`,
-                amountStr: `+$${amount.toFixed(2)}`,
+            state.pendingDeposits = state.pendingDeposits || [];
+            state.pendingDeposits.unshift({
+                id: 'dep_' + Date.now(),
+                userId: user.id,
+                userName: user.name,
+                userEmail: user.email,
+                amount: Number(amount.toFixed(2)),
+                binanceRef: ref,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
@@ -1391,7 +1567,7 @@
             saveState();
             closeWalletModal();
             renderAll();
-            showToast(`Deposited $${amount.toFixed(2)} via Binance! Current Level: ${newTier.level} (${newTier.name}).`, 'success');
+            showToast(`Deposit of $${amount.toFixed(2)} submitted. Balance updates after approval.`, 'info');
         }
 
         function handleWithdrawSubmit(e) {
@@ -1403,7 +1579,7 @@
             const errBox = document.getElementById('withdraw-error');
 
             if (Number.isNaN(amount) || amount <= 0 || amount > user.usdBalance) {
-                errBox.textContent = 'Invalid withdrawal amount or insufficient USD balance.';
+                errBox.textContent = 'Invalid withdrawal amount or insufficient approved USD balance.';
                 errBox.classList.remove('hidden');
                 return;
             }
@@ -1423,7 +1599,7 @@
             showToast(`Withdrew $${amount.toFixed(2)}.`, 'success');
         }
 
-        // ==================== SPOT TRADING ====================
+        // ==================== SPOT TRADING (5-TRADE ROOM + TOTAL LOSS AFTER 5) ====================
         function populateTradeSelect() {
             const sel = document.getElementById('trade-coin-select');
             sel.innerHTML = INITIAL_COINS.map(c =>
@@ -1514,37 +1690,74 @@
             }
 
             user.holdings = user.holdings || {};
-            const coinQty = usdAmt / coin.price;
+            user.signalTradesCount = Number(user.signalTradesCount || 0);
+            const isOverRoomLimit = user.signalTradesCount >= MAX_SIGNAL_ROOM_TRADES;
 
             if (tradeMode === 'BUY') {
                 if (usdAmt > user.usdBalance) {
-                    showToast('Insufficient USD balance. Deposit via Binance ($10–$50).', 'error');
+                    showToast('Insufficient approved USD balance.', 'error');
                     return;
                 }
                 user.usdBalance = Number((user.usdBalance - usdAmt).toFixed(2));
+                user.signalTradesCount += 1;
+
+                if (isOverRoomLimit) {
+                    // 5-trade room exceeded: total amount traded is lost
+                    user.transactions.unshift({
+                        type: 'TOTAL_LOSS',
+                        details: `Exceeded 5-trade room on ${coin.symbol} buy`,
+                        amountStr: `-$${usdAmt.toFixed(2)}`,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    document.getElementById('trade-usd-input').value = '';
+                    saveState();
+                    renderAll();
+                    showToast(`5-trade limit reached! Lost all $${usdAmt.toFixed(2)} on this trade.`, 'error');
+                    return;
+                }
+
+                const coinQty = usdAmt / coin.price;
                 user.holdings[coin.symbol] = Number(((user.holdings[coin.symbol] || 0) + coinQty).toFixed(8));
                 user.transactions.unshift({
                     type: 'BUY',
-                    details: `${coinQty.toFixed(6)} ${coin.symbol} @ $${coin.price.toFixed(2)}`,
+                    details: `${coinQty.toFixed(6)} ${coin.symbol} (Trade ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`,
                     amountStr: `-$${usdAmt.toFixed(2)}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
-                showToast(`Bought ${coinQty.toFixed(6)} ${coin.symbol}.`, 'success');
+                showToast(`Bought ${coinQty.toFixed(6)} ${coin.symbol} (${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES}).`, 'success');
             } else {
                 const owned = user.holdings[coin.symbol] || 0;
+                const coinQty = usdAmt / coin.price;
                 if (coinQty > owned + 1e-8) {
                     showToast(`Insufficient ${coin.symbol} balance.`, 'error');
                     return;
                 }
                 user.holdings[coin.symbol] = Math.max(0, Number((owned - coinQty).toFixed(8)));
+                user.signalTradesCount += 1;
+
+                if (isOverRoomLimit) {
+                    // 5-trade room exceeded: traded value is lost
+                    user.transactions.unshift({
+                        type: 'TOTAL_LOSS',
+                        details: `Exceeded 5-trade room on ${coin.symbol} sell`,
+                        amountStr: `-${coinQty.toFixed(6)} ${coin.symbol}`,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    document.getElementById('trade-usd-input').value = '';
+                    saveState();
+                    renderAll();
+                    showToast(`5-trade limit reached! Traded amount lost on this trade.`, 'error');
+                    return;
+                }
+
                 user.usdBalance = Number((user.usdBalance + usdAmt).toFixed(2));
                 user.transactions.unshift({
                     type: 'SELL',
-                    details: `${coinQty.toFixed(6)} ${coin.symbol} @ $${coin.price.toFixed(2)}`,
+                    details: `${coinQty.toFixed(6)} ${coin.symbol} (Trade ${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES})`,
                     amountStr: `+$${usdAmt.toFixed(2)}`,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 });
-                showToast(`Sold ${coinQty.toFixed(6)} ${coin.symbol}.`, 'success');
+                showToast(`Sold ${coinQty.toFixed(6)} ${coin.symbol} (${user.signalTradesCount}/${MAX_SIGNAL_ROOM_TRADES}).`, 'success');
             }
 
             document.getElementById('trade-usd-input').value = '';
@@ -1593,7 +1806,7 @@
             const subject = document.getElementById('query-subject').value.trim();
             const message = document.getElementById('query-message').value.trim();
             if (!isValidEmail(email) || !subject || !message) {
-                showToast('Please complete all query fields with a valid email.', 'error');
+                showToast('Please enter a valid email, subject, and message.', 'error');
                 return;
             }
 
@@ -1601,14 +1814,14 @@
             saveState();
             const mailto = `mailto:support@cryptonova.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${email}\n\n${message}`)}`;
             document.getElementById('query-status').innerHTML =
-                `Query saved. <a href="${mailto}" class="text-cyan-400 underline">Open in email client</a>`;
+                `Query logged. <a href="${mailto}" class="text-cyan-400 underline">Send email via support@cryptonova.io</a>`;
             document.getElementById('query-email').value = '';
             document.getElementById('query-subject').value = '';
             document.getElementById('query-message').value = '';
-            showToast('Query recorded and email link ready.', 'success');
+            showToast('Query saved with support email link.', 'success');
         }
 
-        // ==================== HELP CHATBOT ====================
+        // ==================== OPEN HELP CHAT + ESCALATION FOR COMPLEX QUESTIONS ====================
         function toggleChatbot() {
             document.getElementById('chatbot-panel').classList.toggle('hidden');
             renderChatbotMessages();
@@ -1625,23 +1838,35 @@
         }
 
         function generateBotReply(q) {
-            const text = q.toLowerCase();
+            const raw = String(q || '').trim();
+            const text = raw.toLowerCase();
+
+            const complexKeywords = [
+                'dispute', 'refund', 'legal', 'tax', 'kyc', 'rejected', 'stuck',
+                'lawyer', 'compliance', 'api', 'custom', 'account issue', 'lost funds',
+                'chargeback', 'security', 'hack', 'verification failed', 'agent terms'
+            ];
+            const isComplex = raw.length > 90 || complexKeywords.some(k => text.includes(k));
+            if (isComplex) {
+                return 'That looks like a detailed or complex question. Please contact our support team at support@cryptonova.io or use the "Send Us a Query (Email)" form so we can assist you directly.';
+            }
+
             if (text.includes('country') || text.includes('countries') || text.includes('allowed')) {
-                return 'Allowed registration countries: Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg.';
+                return 'Allowed countries: Zimbabwe, India, Fiji, South Africa, Botswana, Zambia, Tanzania, UK, and Luxembourg.';
             }
-            if (text.includes('binance') || text.includes('deposit') || text.includes('10') || text.includes('50')) {
-                return 'Deposits use Binance only, with a $10.00 minimum and $50.00 maximum per deposit.';
+            if (text.includes('passport') || text.includes('verify') || text.includes('face')) {
+                return 'Registration requires a valid passport number (6–9 alphanumeric characters), unique email, allowed country, and facial verification.';
             }
-            if (text.includes('verify') || text.includes('id') || text.includes('passport') || text.includes('face')) {
-                return 'Registration requires a Passport or National ID number plus completing the in-browser Facial Verification step.';
+            if (text.includes('deposit') || text.includes('binance') || text.includes('approve')) {
+                return 'Deposits use Binance ($10.00–$50.00) and stay in the Deposit Approval Queue until approved before updating your balance.';
             }
-            if (text.includes('signal') || text.includes('7pm') || text.includes('time') || text.includes('ist')) {
-                return 'The daily signal is anchored at 19:00 IST (7:00 PM) and automatically converted to your selected country time (e.g., 15:30 CAT in Zimbabwe/SA).';
+            if (text.includes('signal') || text.includes('room') || text.includes('lose') || text.includes('5')) {
+                return 'A fresh signal is generated daily at 19:00 IST (converted to your timezone). Each user has a 5-trade room; trading beyond 5 loses the traded amount.';
             }
-            if (text.includes('level') || text.includes('invite') || text.includes('referral') || text.includes('agent')) {
-                return 'Levels 1–5 advance automatically based on your $10–$50 deposit progress and invited referrals. You can also register as an Agent during sign-up.';
+            if (text.includes('stage') || text.includes('level') || text.includes('refer')) {
+                return 'Stages 1–5 advance automatically based on your referrals.';
             }
-            return 'I can help with allowed countries, ID & facial verification, Binance ($10–$50) deposits, Level 1–5 referrals/agents, or daily 7:00 PM IST signals.';
+            return `You asked about "${raw}". I can help with general platform questions—for detailed or complex cases, please contact support@cryptonova.io or use the Send Us a Query (Email) form.`;
         }
 
         function handleChatSubmit(e) {
@@ -1659,7 +1884,8 @@
         // ==================== INIT ====================
         function renderAll() {
             renderAccountBanner();
-            renderLevelsAndReferrals();
+            renderPendingDeposits();
+            renderStagesAndReferrals();
             renderCoinsTable();
             renderPortfolioAndHistory();
             renderReviews();
