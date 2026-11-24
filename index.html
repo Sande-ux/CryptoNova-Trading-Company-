@@ -105,7 +105,7 @@
         <!-- Account Summary Banner -->
         <section id="account-banner" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl"></section>
 
-        <!-- Pending Deposit Approvals Queue (Approval Required Before Balance Updates) -->
+        <!-- Pending Deposit Approvals Queue -->
         <section id="pending-deposits-section" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-amber-500/30">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div>
@@ -122,9 +122,8 @@
             <div id="pending-deposits-list" class="space-y-2.5"></div>
         </section>
 
-        <!-- Daily Signal (Unique Daily + 19:00 IST Equivalent + 5-Trade Room) + Stages & Referrals -->
+        <!-- Daily Signal + Stages & Referrals -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Daily Signal Card -->
             <div class="lg:col-span-5 glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-indigo-500/30 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-3">
@@ -180,7 +179,6 @@
                 </div>
             </div>
 
-            <!-- Stages Only (1-5) + Referrals -->
             <div class="lg:col-span-7 glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-700/70 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -196,11 +194,9 @@
                         </span>
                     </div>
 
-                    <!-- Stages 1 to 5 (Stages only) -->
                     <div id="stages-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5"></div>
                 </div>
 
-                <!-- Referrals Section -->
                 <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-semibold text-white flex items-center gap-1.5">
@@ -235,10 +231,9 @@
             </div>
         </section>
 
-        <!-- Main Workspace Grid: Market Table (Left 8 cols) + Trade Panel (Right 4 cols) -->
+        <!-- Main Workspace Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Left Column -->
             <div class="lg:col-span-8 space-y-6">
 
                 <!-- 10 Curated Cryptocurrencies Card -->
@@ -314,7 +309,6 @@
 
                 <!-- Reviews & Comments + Queries Email Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Reviews & Comments -->
                     <div class="glass-panel rounded-2xl p-5 shadow-xl">
                         <h3 class="text-base font-semibold text-white flex items-center gap-2 mb-3">
                             <i data-lucide="message-square-quote" class="w-4 h-4 text-indigo-400"></i>
@@ -342,7 +336,6 @@
                         <div id="reviews-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
 
-                    <!-- Queries Email Form -->
                     <div class="glass-panel rounded-2xl p-5 shadow-xl">
                         <h3 class="text-base font-semibold text-white flex items-center gap-2 mb-1">
                             <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i>
@@ -449,7 +442,7 @@
                     </div>
                 </div>
 
-                <!-- Quick Funding Card ($10 Min - $50 Max, Binance Only, Approval Required) -->
+                <!-- Quick Funding Card -->
                 <div class="glass-panel rounded-2xl p-5 border border-slate-800/80">
                     <h4 class="text-sm font-semibold text-white mb-1">Binance USD Wallet ($10–$50)</h4>
                     <p class="text-xs text-slate-400 mb-3">Deposits require approval before updating your USD balance.</p>
@@ -495,25 +488,25 @@
         </div>
     </div>
 
-    <!-- Legal Disclaimer Footer -->
+    <!-- Real Legal & Risk Disclaimer Footer -->
     <footer class="border-t border-slate-800/80 bg-slate-950/90 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-800/80 mb-6">
                 <div class="flex items-start gap-3">
                     <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
                     <div class="text-xs text-slate-400 leading-relaxed space-y-1.5">
-                        <p class="font-semibold text-slate-300">Legal, Intellectual Property & Risk Disclaimer</p>
+                        <p class="font-semibold text-slate-300">Disclaimer & Risk Notice</p>
                         <p>
-                            <strong>Open-Source & Decentralized Asset Notice:</strong> All ten (10) digital assets listed on CryptoNova (BTC, ETH, SOL, ADA, AVAX, DOT, LINK, LTC, POL, ATOM) are decentralized, open-source blockchain protocols. This platform is an independent interface and is <strong>not affiliated with or endorsed by</strong> Binance or any cryptocurrency foundation.
+                            <strong>Asset & Protocol Notice:</strong> All digital assets listed on CryptoNova (BTC, ETH, SOL, ADA, AVAX, DOT, LINK, LTC, POL, ATOM) are decentralized blockchain assets. Ticker symbols and names are used for identification only. CryptoNova is an independent platform and is not affiliated with, sponsored by, or endorsed by Binance or any asset foundation.
                         </p>
                         <p>
-                            <strong>Verification & Financial Risk Notice:</strong> Passport validation checks format locally without government API verification, and browser facial checks provide local workflow verification. Cryptocurrency trading carries risk; deposits are limited to $10.00–$50.00 USD and require approval.
+                            <strong>Trading, Verification & Room Rules:</strong> Trading digital assets involves significant risk of loss, including total loss of funds traded beyond the 5-trade signal room limit. Deposits are accepted via Binance between $10.00 and $50.00 USD and take effect only upon approval. Registration is restricted to approved jurisdictions and requires valid email, passport details, and facial verification. Nothing on this site constitutes financial, investment, tax, or legal advice.
                         </p>
                     </div>
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-                <p>&copy; 2026 CryptoNova Exchange Interface. All rights reserved.</p>
+                <p>&copy; 2026 CryptoNova. All rights reserved.</p>
                 <div class="flex items-center gap-4">
                     <span>Deposit Limits: $10.00 – $50.00 USD</span>
                     <span>&bull;</span>
@@ -525,7 +518,7 @@
 
     <!-- ==================== MODALS ==================== -->
 
-    <!-- Auth Modal (Login / Register with Valid Passport, Country Allowlist, Facial Verification, Agent Option) -->
+    <!-- Auth Modal -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
@@ -642,7 +635,7 @@
         </div>
     </div>
 
-    <!-- Wallet Modal (Deposit $10-$50 via Binance Only + Withdraw) -->
+    <!-- Wallet Modal -->
     <div id="wallet-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
             <button onclick="closeWalletModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
@@ -673,7 +666,6 @@
                 <span id="modal-usd-balance" class="font-mono font-bold text-white text-base">$0.00</span>
             </div>
 
-            <!-- Deposit Form (Binance Only, $10 Min - $50 Max, Requires Approval) -->
             <form id="deposit-form" onsubmit="handleDepositSubmit(event)" class="space-y-4">
                 <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 flex items-center justify-between">
                     <span class="font-semibold">Payment Channel: Binance Only</span>
@@ -715,7 +707,6 @@
                 </button>
             </form>
 
-            <!-- Withdraw Form -->
             <form id="withdraw-form" onsubmit="handleWithdrawSubmit(event)" class="hidden space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Withdraw Amount (USD)</label>
@@ -745,18 +736,17 @@
         ];
 
         const COUNTRY_OFFSETS_MINUTES = {
-            IN: 330,   // UTC+5:30 -> 19:00
-            ZW: 120,   // UTC+2 -> 15:30
-            ZA: 120,   // UTC+2 -> 15:30
-            BW: 120,   // UTC+2 -> 15:30
-            ZM: 120,   // UTC+2 -> 15:30
-            TZ: 180,   // UTC+3 -> 16:30
-            FJ: 720,   // UTC+12 -> 01:30 (+1d)
-            GB: 0,     // UTC+0 -> 13:30
-            LU: 60     // UTC+1 -> 14:30
+            IN: 330,
+            ZW: 120,
+            ZA: 120,
+            BW: 120,
+            ZM: 120,
+            TZ: 180,
+            FJ: 720,
+            GB: 0,
+            LU: 60
         };
 
-        // Stage updates automatically based on referrals count
         const STAGE_DEFS = [
             { stage: 1, minReferrals: 0 },
             { stage: 2, minReferrals: 1 },
@@ -780,7 +770,7 @@
             { id: 'cosmos', symbol: 'ATOM', name: 'Cosmos', price: 6.45, change24h: 1.34, mcap: '2.5B', spark: [6.25, 6.30, 6.28, 6.35, 6.39, 6.42, 6.45] }
         ];
 
-        const STORAGE_KEY = 'cryptonova_state_v3';
+        const STORAGE_KEY = 'cryptonova_frontend_v4';
 
         let state = loadState();
         let selectedCoinId = state.selectedCoinId || 'bitcoin';
@@ -845,7 +835,6 @@
             return state.users.find(u => u.id === state.currentUserId) || null;
         }
 
-        // Stage updates automatically based on referrals only
         function computeUserStage(user) {
             const refs = user ? Number(user.referralsCount || 0) : 0;
             let currentStage = 1;
@@ -869,9 +858,7 @@
             setTimeout(() => el.remove(), 3400);
         }
 
-        // ==================== UNIQUE DAILY SIGNAL + 19:00 IST CONVERSION ====================
         function getDateKeyIST() {
-            // Current time in IST (UTC+5:30)
             const nowIst = new Date(Date.now() + 330 * 60 * 1000);
             const y = nowIst.getUTCFullYear();
             const m = String(nowIst.getUTCMonth() + 1).padStart(2, '0');
@@ -880,7 +867,6 @@
         }
 
         function getDailySignalForDate(dateKey) {
-            // Deterministic per-day hash so each new day produces a different signal
             let hash = 0;
             for (let i = 0; i < dateKey.length; i++) {
                 hash = ((hash << 5) - hash + dateKey.charCodeAt(i) * (i + 7)) | 0;
@@ -901,7 +887,7 @@
         }
 
         function formatIstAnchorToRegion(regionCode) {
-            const utcMinutes = 19 * 60 - 330; // 19:00 IST = 13:30 UTC
+            const utcMinutes = 19 * 60 - 330;
             const offset = COUNTRY_OFFSETS_MINUTES[regionCode] ?? 330;
             let localTotal = utcMinutes + offset;
             let dayShift = 0;
@@ -953,7 +939,6 @@
             showToast(`Loaded today's unique signal (${sig.coin.symbol} ${sig.direction}).`, 'info');
         }
 
-        // ==================== STAGES ONLY (1-5) & REFERRALS ====================
         function renderStagesAndReferrals() {
             const user = getCurrentUser();
             const currentStage = computeUserStage(user);
@@ -1028,7 +1013,6 @@
             addReferralUser(email);
         }
 
-        // ==================== PENDING DEPOSIT APPROVALS ====================
         function renderPendingDeposits() {
             const list = document.getElementById('pending-deposits-list');
             const badge = document.getElementById('pending-deposit-count');
@@ -1092,7 +1076,6 @@
             showToast(`Rejected deposit request from ${req.userName}.`, 'info');
         }
 
-        // ==================== MARKET TABLE & SPARKLINES ====================
         function renderSparkline(values, positive) {
             const min = Math.min(...values);
             const max = Math.max(...values);
@@ -1163,7 +1146,6 @@
             updateDailySignalUI();
         }
 
-        // ==================== PORTFOLIO & TRANSACTIONS ====================
         function switchBottomTab(tab) {
             const isPort = tab === 'portfolio';
             document.getElementById('tab-content-portfolio').classList.toggle('hidden', !isPort);
@@ -1230,7 +1212,6 @@
             }
         }
 
-        // ==================== ACCOUNT BANNER & NAV ====================
         function renderAccountBanner() {
             const user = getCurrentUser();
             const nav = document.getElementById('nav-auth-section');
@@ -1296,7 +1277,6 @@
             `;
         }
 
-        // ==================== AUTH, VALID PASSPORT, COUNTRY ALLOWLIST & FACIAL VERIFICATION ====================
         function openAuthModal(mode = 'LOGIN') {
             switchAuthMode(mode);
             const modal = document.getElementById('auth-modal');
@@ -1384,7 +1364,6 @@
         }
 
         function isValidPassportNumber(passport) {
-            // Standard alphanumeric passport format (6-9 chars, not all identical digits/letters)
             const cleaned = String(passport || '').trim().toUpperCase();
             if (!/^[A-Z0-9]{6,9}$/.test(cleaned)) return false;
             if (/^(.)\1+$/.test(cleaned)) return false;
@@ -1491,7 +1470,6 @@
             showToast('Logged out.', 'info');
         }
 
-        // ==================== WALLET (BINANCE ONLY, $10 MIN - $50 MAX, APPROVAL REQUIRED) ====================
         function openWalletModal(tab = 'DEPOSIT') {
             if (!getCurrentUser()) {
                 openAuthModal('LOGIN');
@@ -1599,7 +1577,6 @@
             showToast(`Withdrew $${amount.toFixed(2)}.`, 'success');
         }
 
-        // ==================== SPOT TRADING (5-TRADE ROOM + TOTAL LOSS AFTER 5) ====================
         function populateTradeSelect() {
             const sel = document.getElementById('trade-coin-select');
             sel.innerHTML = INITIAL_COINS.map(c =>
@@ -1702,7 +1679,6 @@
                 user.signalTradesCount += 1;
 
                 if (isOverRoomLimit) {
-                    // 5-trade room exceeded: total amount traded is lost
                     user.transactions.unshift({
                         type: 'TOTAL_LOSS',
                         details: `Exceeded 5-trade room on ${coin.symbol} buy`,
@@ -1736,7 +1712,6 @@
                 user.signalTradesCount += 1;
 
                 if (isOverRoomLimit) {
-                    // 5-trade room exceeded: traded value is lost
                     user.transactions.unshift({
                         type: 'TOTAL_LOSS',
                         details: `Exceeded 5-trade room on ${coin.symbol} sell`,
@@ -1765,7 +1740,6 @@
             renderAll();
         }
 
-        // ==================== REVIEWS & QUERIES EMAIL ====================
         function renderReviews() {
             const list = document.getElementById('reviews-list');
             list.innerHTML = (state.reviews || []).map(r => `
@@ -1821,7 +1795,6 @@
             showToast('Query saved with support email link.', 'success');
         }
 
-        // ==================== OPEN HELP CHAT + ESCALATION FOR COMPLEX QUESTIONS ====================
         function toggleChatbot() {
             document.getElementById('chatbot-panel').classList.toggle('hidden');
             renderChatbotMessages();
@@ -1881,7 +1854,6 @@
             renderChatbotMessages();
         }
 
-        // ==================== INIT ====================
         function renderAll() {
             renderAccountBanner();
             renderPendingDeposits();
