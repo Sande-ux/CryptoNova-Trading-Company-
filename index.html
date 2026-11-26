@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CryptoNova | Decentralized Asset Exchange</title>
+    <title>Zimora | Decentralized Asset Exchange</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -78,11 +77,14 @@
     <header class="sticky top-0 z-30 glass-panel border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                <!-- Zimora Green & Yellow Z Logo -->
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-lime-400 to-amber-400 flex items-center justify-center shadow-lg shadow-emerald-500/25 ring-1 ring-white/20" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 6h14L5 18h14" />
+                    </svg>
                 </div>
                 <div>
-                    <span class="font-bold text-lg tracking-tight text-white">Crypto<span class="text-indigo-400">Nova</span></span>
+                    <span class="font-bold text-lg tracking-tight text-white"><span class="text-indigo-400">Zimora</span></span>
                     <span class="hidden sm:inline-block ml-2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">10-Asset Curated</span>
                 </div>
             </div>
@@ -102,6 +104,79 @@
 
     <!-- Main Dashboard Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Zimora Account Login, Verification, Logout & Wallet Controls -->
+        <section id="zimora-session-panel" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl border border-indigo-500/30 space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-lg font-bold text-white">Zimora Account & Wallet</h1>
+                        <span id="zimora-auth-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                            Logged Out
+                        </span>
+                        <span id="zimora-verify-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            Unverified
+                        </span>
+                    </div>
+                    <p id="zimora-session-subtext" class="text-xs text-slate-400 mt-1">
+                        Sign in to Zimora, complete verification, and manage deposits or withdrawals.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="px-4 py-2 rounded-xl bg-slate-900/90 border border-slate-800">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-400">USD Balance</div>
+                        <div id="zimora-usd-balance" class="font-mono text-base font-bold text-emerald-400">$0.00</div>
+                    </div>
+                    <div id="zimora-session-actions" class="flex flex-wrap items-center gap-2"></div>
+                </div>
+            </div>
+
+            <!-- Login Form (visible when logged out) -->
+            <form id="zimora-login-form" onsubmit="handleZimoraLogin(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80">
+                <input type="text" id="zimora-login-name" required placeholder="Your Name"
+                    class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <input type="email" id="zimora-login-email" required placeholder="Your Email Address"
+                    class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <button type="submit"
+                    class="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                    Log In to Zimora
+                </button>
+            </form>
+
+            <!-- Verification Box (visible when logged in) -->
+            <div id="zimora-verify-box" class="hidden pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1 flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="zimora-verify-code" placeholder="Enter Verification Code or ID (e.g. ZMR-2026)"
+                        class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                    <button type="button" onclick="submitZimoraVerification()"
+                        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition">
+                        Verify Account
+                    </button>
+                </div>
+                <span id="zimora-verify-detail" class="text-xs text-slate-400 font-mono"></span>
+            </div>
+
+            <!-- Direct Deposit & Withdrawal Bar -->
+            <div class="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1 flex flex-col sm:flex-row gap-2">
+                    <input type="number" id="zimora-wallet-amount" step="0.01" min="0.01" placeholder="Amount (USD)"
+                        class="w-full sm:w-44 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="zimora-wallet-dest" placeholder="Binance Ref / Withdrawal Destination"
+                        class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="processZimoraDeposit()"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                        Deposit
+                    </button>
+                    <button type="button" onclick="processZimoraWithdrawal()"
+                        class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white transition">
+                        Withdraw
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <!-- Account Summary Banner -->
         <section id="account-banner" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl"></section>
@@ -177,7 +252,6 @@
                         <option value="ZM">Zambia (CAT, UTC+2) — 15:30–15:35</option>
                         <option value="TZ">Tanzania (EAT, UTC+3) — 16:30–16:35</option>
                         <option value="FJ">Fiji (FJT, UTC+12) — 01:30–01:35 (+1d)</option>
-                        <option value="GB">UK (GMT, UTC+0) — 13:30–13:35</option>
                         <option value="LU">Luxembourg (CET, UTC+1) — 14:30–14:35</option>
                     </select>
                 </div>
@@ -345,7 +419,7 @@
                             <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i>
                             Send Us a Query (Email)
                         </h3>
-                        <p class="text-xs text-slate-400 mb-3">Send questions or complex support requests directly to our team.</p>
+                        <p class="text-xs text-slate-400 mb-3">Send questions or complex support requests directly to Zimora.</p>
                         <form onsubmit="handleQuerySubmit(event)" class="space-y-2.5">
                             <input type="email" id="query-email" required placeholder="Your email address"
                                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
@@ -475,7 +549,7 @@
             <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i>
-                    <span class="text-xs font-semibold text-white">CryptoNova Help Chat</span>
+                    <span class="text-xs font-semibold text-white">Zimora Help Chat</span>
                 </div>
                 <button onclick="toggleChatbot()" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-4 h-4"></i>
@@ -484,4 +558,839 @@
             <div id="chatbot-messages" class="p-3.5 space-y-2.5 max-h-64 overflow-y-auto text-xs"></div>
             <form onsubmit="handleChatSubmit(event)" class="p-2.5 border-t border-slate-800 flex gap-2 bg-slate-950/70">
                 <input type="text" id="chatbot-input" placeholder="Ask anything..."
-                    class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:o
+                    class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ZIMORA_KEY = 'zimora_live_state_v2';
+
+        const COINS = [
+            { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', price: 92450.00, change24h: 2.84, marketCap: '$1.83T', trend: '+6.2%' },
+            { id: 'ETH', name: 'Ethereum', symbol: 'ETH', price: 3280.50, change24h: 1.92, marketCap: '$395.4B', trend: '+4.8%' },
+            { id: 'SOL', name: 'Solana', symbol: 'SOL', price: 184.20, change24h: 4.15, marketCap: '$88.6B', trend: '+11.4%' },
+            { id: 'BNB', name: 'BNB', symbol: 'BNB', price: 642.80, change24h: 1.12, marketCap: '$93.7B', trend: '+3.1%' },
+            { id: 'XRP', name: 'XRP', symbol: 'XRP', price: 2.38, change24h: 5.40, marketCap: '$136.2B', trend: '+14.7%' },
+            { id: 'ADA', name: 'Cardano', symbol: 'ADA', price: 0.94, change24h: -0.85, marketCap: '$33.1B', trend: '+2.3%' },
+            { id: 'AVAX', name: 'Avalanche', symbol: 'AVAX', price: 38.60, change24h: 3.05, marketCap: '$15.8B', trend: '+7.5%' },
+            { id: 'LINK', name: 'Chainlink', symbol: 'LINK', price: 21.45, change24h: 2.28, marketCap: '$13.4B', trend: '+5.9%' },
+            { id: 'DOT', name: 'Polkadot', symbol: 'DOT', price: 7.82, change24h: -1.14, marketCap: '$11.9B', trend: '+1.6%' },
+            { id: 'LTC', name: 'Litecoin', symbol: 'LTC', price: 108.90, change24h: 1.76, marketCap: '$8.2B', trend: '+4.0%' }
+        ];
+
+        const REGION_WINDOWS = {
+            IN: 'Anchor: 19:00 IST • 5-Min Window: 19:00–19:05 IST',
+            ZW: 'Anchor: 15:30 CAT • 5-Min Window: 15:30–15:35 CAT',
+            ZA: 'Anchor: 15:30 SAST • 5-Min Window: 15:30–15:35 SAST',
+            BW: 'Anchor: 15:30 CAT • 5-Min Window: 15:30–15:35 CAT',
+            ZM: 'Anchor: 15:30 CAT • 5-Min Window: 15:30–15:35 CAT',
+            TZ: 'Anchor: 16:30 EAT • 5-Min Window: 16:30–16:35 EAT',
+            FJ: 'Anchor: 01:30 FJT (+1d) • 5-Min Window: 01:30–01:35 FJT',
+            LU: 'Anchor: 14:30 CET • 5-Min Window: 14:30–14:35 CET'
+        };
+
+        const STAGE_TIERS = [
+            { stage: 1, minRefs: 0, label: 'Starter' },
+            { stage: 2, minRefs: 2, label: 'Builder' },
+            { stage: 3, minRefs: 5, label: 'Partner' },
+            { stage: 4, minRefs: 10, label: 'Leader' },
+            { stage: 5, minRefs: 20, label: 'Executive' }
+        ];
+
+        const defaultState = {
+            user: null,
+            usdBalance: 0,
+            holdings: {},
+            pendingDeposits: [],
+            transactions: [],
+            tradesUsed: 0,
+            referrals: 0,
+            selectedCoin: 'BTC',
+            tradeMode: 'BUY',
+            reviews: [
+                { author: 'Tendai M.', rating: 5, comment: 'Fast settlement and clean signal tracking on Zimora.' },
+                { author: 'Aarav S.', rating: 5, comment: 'Clear 5-trade room cap and straightforward wallet flow.' }
+            ]
+        };
+
+        let state = loadState();
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(ZIMORA_KEY);
+                if (!raw) return JSON.parse(JSON.stringify(defaultState));
+                return { ...JSON.parse(JSON.stringify(defaultState)), ...JSON.parse(raw) };
+            } catch {
+                return JSON.parse(JSON.stringify(defaultState));
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(ZIMORA_KEY, JSON.stringify(state));
+        }
+
+        function formatUSD(amount) {
+            return '$' + Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const palette = {
+                success: 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200',
+                error: 'bg-rose-950/95 border-rose-500/50 text-rose-200',
+                info: 'bg-slate-900/95 border-indigo-500/50 text-slate-100'
+            };
+            const el = document.createElement('div');
+            el.className = `pointer-events-auto px-4 py-3 rounded-xl border text-xs font-medium shadow-xl transition ${palette[type] || palette.info}`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function refreshIcons() {
+            if (window.lucide) lucide.createIcons();
+        }
+
+        /* --- Login, Verification & Logout --- */
+        function handleZimoraLogin(event) {
+            event.preventDefault();
+            const name = document.getElementById('zimora-login-name').value.trim();
+            const email = document.getElementById('zimora-login-email').value.trim();
+            if (!name || !email) return;
+
+            state.user = {
+                id: 'ZMR-' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+                name,
+                email,
+                verified: state.user?.verified || false,
+                verificationCode: state.user?.verificationCode || ''
+            };
+            saveState();
+            renderAll();
+            showToast(`Logged in to Zimora as ${name}.`, 'success');
+        }
+
+        function focusLoginForm() {
+            const form = document.getElementById('zimora-login-form');
+            if (form) form.classList.remove('hidden');
+            document.getElementById('zimora-login-name')?.focus();
+        }
+
+        function logoutZimora() {
+            state.user = null;
+            saveState();
+            renderAll();
+            showToast('Logged out of Zimora.', 'info');
+        }
+
+        function submitZimoraVerification() {
+            if (!state.user) {
+                showToast('Please log in first to verify your account.', 'error');
+                focusLoginForm();
+                return;
+            }
+            const codeInput = document.getElementById('zimora-verify-code');
+            const code = (codeInput?.value || '').trim() || ('VER-' + Math.floor(100000 + Math.random() * 900000));
+            state.user.verified = true;
+            state.user.verificationCode = code;
+            if (codeInput) codeInput.value = '';
+            saveState();
+            renderAll();
+            showToast('Zimora account verified!', 'success');
+        }
+
+        function toggleVerificationStatus() {
+            if (!state.user) {
+                showToast('Please log in first.', 'error');
+                focusLoginForm();
+                return;
+            }
+            state.user.verified = !state.user.verified;
+            if (state.user.verified && !state.user.verificationCode) {
+                state.user.verificationCode = 'VER-' + Math.floor(100000 + Math.random() * 900000);
+            }
+            saveState();
+            renderAll();
+            showToast(state.user.verified ? 'Account marked as Verified.' : 'Account marked as Unverified.', 'info');
+        }
+
+        /* --- Direct Deposit & Withdrawal --- */
+        function processZimoraDeposit() {
+            if (!state.user) {
+                showToast('Please log in to Zimora before depositing.', 'error');
+                focusLoginForm();
+                return;
+            }
+            const amount = parseFloat(document.getElementById('zimora-wallet-amount')?.value);
+            const ref = (document.getElementById('zimora-wallet-dest')?.value || '').trim() || 'BNB-DIRECT';
+            if (isNaN(amount) || amount < 10 || amount > 50) {
+                showToast('Binance USD deposit amount must be between $10.00 and $50.00.', 'error');
+                return;
+            }
+
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            state.pendingDeposits.unshift({
+                id: 'DEP-' + Date.now().toString().slice(-6),
+                amount,
+                reference: ref,
+                time: now
+            });
+            state.transactions.unshift({
+                type: 'DEPOSIT QUEUED',
+                details: `Binance Ref: ${ref}`,
+                value: formatUSD(amount),
+                time: now
+            });
+            document.getElementById('zimora-wallet-amount').value = '';
+            saveState();
+            renderAll();
+            showToast(`Queued ${formatUSD(amount)} deposit for settlement.`, 'info');
+        }
+
+        function processZimoraWithdrawal() {
+            if (!state.user) {
+                showToast('Please log in to Zimora before withdrawing.', 'error');
+                focusLoginForm();
+                return;
+            }
+            const amount = parseFloat(document.getElementById('zimora-wallet-amount')?.value);
+            const dest = (document.getElementById('zimora-wallet-dest')?.value || '').trim() || 'Zimora Wallet';
+            if (isNaN(amount) || amount <= 0) {
+                showToast('Enter a valid withdrawal amount in USD.', 'error');
+                return;
+            }
+            if (amount > state.usdBalance) {
+                showToast(`Insufficient balance (${formatUSD(state.usdBalance)} available).`, 'error');
+                return;
+            }
+
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            state.usdBalance = Number((state.usdBalance - amount).toFixed(2));
+            state.transactions.unshift({
+                type: 'WITHDRAWAL',
+                details: `Withdrawn to ${dest}`,
+                value: '-' + formatUSD(amount),
+                time: now
+            });
+            document.getElementById('zimora-wallet-amount').value = '';
+            saveState();
+            renderAll();
+            showToast(`Withdrew ${formatUSD(amount)} successfully!`, 'success');
+        }
+
+        function openWalletModal(mode) {
+            if (!state.user) {
+                showToast('Please log in to Zimora first.', 'error');
+                focusLoginForm();
+                return;
+            }
+            const amtInput = document.getElementById('zimora-wallet-amount');
+            if (amtInput) {
+                amtInput.focus();
+                if (mode === 'WITHDRAW' && state.usdBalance > 0 && !amtInput.value) {
+                    amtInput.value = state.usdBalance.toFixed(2);
+                }
+            }
+            showToast(mode === 'WITHDRAW' ? 'Enter withdrawal amount and click Withdraw.' : 'Enter $10–$50 deposit amount and click Deposit.', 'info');
+        }
+
+        function settlePendingDeposit(id) {
+            const index = state.pendingDeposits.findIndex(item => item.id === id);
+            if (index === -1) return;
+            const [deposit] = state.pendingDeposits.splice(index, 1);
+            state.usdBalance = Number((state.usdBalance + deposit.amount).toFixed(2));
+            state.transactions.unshift({
+                type: 'DEPOSIT SETTLED',
+                details: `Binance Ref: ${deposit.reference}`,
+                value: '+' + formatUSD(deposit.amount),
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            saveState();
+            renderAll();
+            showToast(`Credited ${formatUSD(deposit.amount)} to your USD balance.`, 'success');
+        }
+
+        /* --- Render Session, Nav & Banner --- */
+        function renderSessionAndNav() {
+            const nav = document.getElementById('nav-auth-section');
+            const authBadge = document.getElementById('zimora-auth-badge');
+            const verifyBadge = document.getElementById('zimora-verify-badge');
+            const subtext = document.getElementById('zimora-session-subtext');
+            const balEl = document.getElementById('zimora-usd-balance');
+            const actionsEl = document.getElementById('zimora-session-actions');
+            const loginForm = document.getElementById('zimora-login-form');
+            const verifyBox = document.getElementById('zimora-verify-box');
+            const verifyDetail = document.getElementById('zimora-verify-detail');
+
+            if (balEl) balEl.textContent = formatUSD(state.usdBalance);
+
+            if (!state.user) {
+                if (nav) {
+                    nav.innerHTML = `
+                        <button type="button" onclick="focusLoginForm()"
+                            class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                            Log In
+                        </button>
+                    `;
+                }
+                if (authBadge) {
+                    authBadge.textContent = 'Logged Out';
+                    authBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700';
+                }
+                if (verifyBadge) {
+                    verifyBadge.textContent = 'Unverified';
+                    verifyBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+                }
+                if (subtext) subtext.textContent = 'Log in to Zimora below to verify your account, deposit funds, and withdraw.';
+                if (actionsEl) {
+                    actionsEl.innerHTML = `
+                        <button type="button" onclick="focusLoginForm()"
+                            class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+                            Log In
+                        </button>
+                    `;
+                }
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (verifyBox) verifyBox.classList.add('hidden');
+            } else {
+                const isVer = Boolean(state.user.verified);
+                if (nav) {
+                    nav.innerHTML = `
+                        <span class="hidden sm:inline text-xs font-semibold text-white">${state.user.name}</span>
+                        <button type="button" onclick="toggleVerificationStatus()"
+                            class="px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition ${isVer
+                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
+                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'}">
+                            ${isVer ? 'Verified' : 'Verify'}
+                        </button>
+                        <button type="button" onclick="logoutZimora()"
+                            class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition">
+                            Log Out
+                        </button>
+                    `;
+                }
+                if (authBadge) {
+                    authBadge.textContent = `Logged In: ${state.user.name} (${state.user.id})`;
+                    authBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30';
+                }
+                if (verifyBadge) {
+                    verifyBadge.textContent = isVer ? 'Verified' : 'Unverified';
+                    verifyBadge.className = isVer
+                        ? 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                        : 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+                }
+                if (subtext) subtext.textContent = `Signed in as ${state.user.email} • Verification status: ${isVer ? 'Verified' : 'Unverified'}.`;
+                if (actionsEl) {
+                    actionsEl.innerHTML = `
+                        <button type="button" onclick="toggleVerificationStatus()"
+                            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition">
+                            ${isVer ? 'Mark Unverified' : 'Verify Now'}
+                        </button>
+                        <button type="button" onclick="logoutZimora()"
+                            class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition">
+                            Log Out
+                        </button>
+                    `;
+                }
+                if (loginForm) loginForm.classList.add('hidden');
+                if (verifyBox) verifyBox.classList.remove('hidden');
+                if (verifyDetail) {
+                    verifyDetail.textContent = isVer
+                        ? `Verified ID: ${state.user.verificationCode || 'CONFIRMED'}`
+                        : 'Enter a verification code to verify.';
+                }
+            }
+            refreshIcons();
+        }
+
+        function renderAccountBanner() {
+            const banner = document.getElementById('account-banner');
+            if (!banner) return;
+
+            let holdingsValue = 0;
+            Object.entries(state.holdings).forEach(([sym, qty]) => {
+                const coin = COINS.find(c => c.symbol === sym);
+                if (coin && qty > 0) holdingsValue += qty * coin.price;
+            });
+
+            banner.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                    <div>
+                        <div class="text-xs text-slate-400">Zimora Member Status</div>
+                        <div class="text-base font-bold text-white mt-0.5">${state.user ? state.user.name + (state.user.verified ? ' • Verified' : ' • Unverified') : 'Guest (Logged Out)'}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                        <div class="text-xs text-slate-400">Available USD Balance</div>
+                        <div class="text-lg font-mono font-bold text-emerald-400 mt-0.5">${formatUSD(state.usdBalance)}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                        <div class="text-xs text-slate-400">Total Equity (USD + Holdings)</div>
+                        <div class="text-lg font-mono font-bold text-white mt-0.5">${formatUSD(state.usdBalance + holdingsValue)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPendingDeposits() {
+            const list = document.getElementById('pending-deposits-list');
+            const countEl = document.getElementById('pending-deposit-count');
+            if (!list || !countEl) return;
+
+            countEl.textContent = `${state.pendingDeposits.length} Awaiting Settlement`;
+            if (state.pendingDeposits.length === 0) {
+                list.innerHTML = `<div class="text-xs text-slate-500 py-2">No pending Binance transfers in queue.</div>`;
+                return;
+            }
+
+            list.innerHTML = state.pendingDeposits.map(item => `
+                <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+                    <div>
+                        <span class="font-mono font-semibold text-white">${formatUSD(item.amount)}</span>
+                        <span class="text-slate-400 ml-2">Ref: <span class="font-mono text-cyan-300">${item.reference}</span></span>
+                        <span class="text-slate-500 ml-2">(${item.time})</span>
+                    </div>
+                    <button type="button" onclick="settlePendingDeposit('${item.id}')"
+                        class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition">
+                        Confirm & Credit USD
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        /* --- Daily Signal, Stages & Referrals --- */
+        function updateDailySignalUI() {
+            const region = document.getElementById('signal-region-select')?.value || 'IN';
+            const timesEl = document.getElementById('daily-signal-times');
+            if (timesEl && REGION_WINDOWS[region]) timesEl.textContent = REGION_WINDOWS[region];
+
+            const btc = COINS[0];
+            document.getElementById('daily-signal-title').textContent = `Daily Signal: ${btc.name} (${btc.symbol})`;
+            document.getElementById('signal-entry').textContent = formatUSD(btc.price);
+            document.getElementById('signal-target').textContent = formatUSD(btc.price * 1.018);
+            document.getElementById('signal-room-pill').textContent = `Room: ${state.tradesUsed} / 5 Trades Used`;
+            document.getElementById('trade-room-badge').textContent = `${state.tradesUsed} / 5 Trades`;
+        }
+
+        function useDailySignal() {
+            state.selectedCoin = 'BTC';
+            setTradeMode('BUY');
+            const select = document.getElementById('trade-coin-select');
+            if (select) select.value = 'BTC';
+            updateTradeBoxUI();
+            showToast('Loaded Bitcoin (BTC) signal into Spot Trade box.', 'info');
+        }
+
+        function renderStagesAndReferrals() {
+            const grid = document.getElementById('stages-grid');
+            const badge = document.getElementById('current-stage-badge');
+            const countLabel = document.getElementById('referral-count-label');
+            const linkEl = document.getElementById('referral-link-display');
+
+            let currentStage = 1;
+            STAGE_TIERS.forEach(tier => {
+                if (state.referrals >= tier.minRefs) currentStage = tier.stage;
+            });
+
+            if (badge) badge.textContent = `Stage ${currentStage}`;
+            if (countLabel) countLabel.textContent = `${state.referrals} Referrals`;
+            if (linkEl) {
+                linkEl.textContent = state.user
+                    ? `https://zimora.exchange/ref/${state.user.id}`
+                    : 'Sign in to generate your unique referral link';
+            }
+
+            if (grid) {
+                grid.innerHTML = STAGE_TIERS.map(tier => {
+                    const active = tier.stage === currentStage;
+                    const unlocked = state.referrals >= tier.minRefs;
+                    return `
+                        <div class="p-3 rounded-xl border ${active ? 'bg-indigo-600/20 border-indigo-500 text-white' : unlocked ? 'bg-slate-900/90 border-slate-700 text-slate-200' : 'bg-slate-950/60 border-slate-800/80 text-slate-500'}">
+                            <div class="text-xs font-bold">Stage ${tier.stage}</div>
+                            <div class="text-[11px] mt-0.5">${tier.label}</div>
+                            <div class="text-[10px] font-mono mt-1">${tier.minRefs}+ Refs</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function copyReferralLink() {
+            if (!state.user) {
+                focusLoginForm();
+                return;
+            }
+            navigator.clipboard?.writeText(`https://zimora.exchange/ref/${state.user.id}`);
+            showToast('Copied your Zimora referral link!', 'success');
+        }
+
+        function addReferralUser() {
+            if (!state.user) {
+                focusLoginForm();
+                return;
+            }
+            state.referrals += 1;
+            saveState();
+            renderStagesAndReferrals();
+            showToast(`Referral added (${state.referrals} total).`, 'success');
+        }
+
+        function handleDirectReferralSubmit(event) {
+            event.preventDefault();
+            if (!state.user) {
+                focusLoginForm();
+                return;
+            }
+            const input = document.getElementById('refer-friend-email');
+            if (!input.value.trim()) return;
+            state.referrals += 1;
+            input.value = '';
+            saveState();
+            renderStagesAndReferrals();
+            showToast('Referral invite sent!', 'success');
+        }
+
+        /* --- Market & Spot Trade --- */
+        function renderCoinsTable() {
+            const tbody = document.getElementById('coins-table-body');
+            const query = (document.getElementById('coin-search')?.value || '').toLowerCase();
+            if (!tbody) return;
+
+            const rows = COINS.filter(c => c.name.toLowerCase().includes(query) || c.symbol.toLowerCase().includes(query));
+            tbody.innerHTML = rows.map(coin => {
+                const pos = coin.change24h >= 0;
+                return `
+                    <tr class="hover:bg-slate-900/50 transition">
+                        <td class="py-3.5 pl-5 pr-3">
+                            <div class="font-semibold text-white">${coin.name}</div>
+                            <div class="text-xs font-mono text-slate-400">${coin.symbol}</div>
+                        </td>
+                        <td class="py-3.5 px-3 text-right font-mono text-white">${formatUSD(coin.price)}</td>
+                        <td class="py-3.5 px-3 text-right font-mono ${pos ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${pos ? '+' : ''}${coin.change24h.toFixed(2)}%
+                        </td>
+                        <td class="py-3.5 px-3 text-right font-mono text-slate-300 hidden sm:table-cell">${coin.marketCap}</td>
+                        <td class="py-3.5 px-3 text-center font-mono text-xs text-cyan-300 hidden md:table-cell">${coin.trend}</td>
+                        <td class="py-3.5 pl-3 pr-5 text-right">
+                            <button type="button" onclick="selectCoinForTrade('${coin.symbol}')"
+                                class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-semibold transition">
+                                Trade
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const ticker = document.getElementById('header-btc-ticker');
+            if (ticker) ticker.textContent = `BTC ${formatUSD(COINS[0].price)}`;
+        }
+
+        function populateTradeCoinSelect() {
+            const select = document.getElementById('trade-coin-select');
+            if (!select) return;
+            select.innerHTML = COINS.map(c => `<option value="${c.symbol}">${c.name} (${c.symbol})</option>`).join('');
+            select.value = state.selectedCoin;
+        }
+
+        function selectCoinForTrade(symbol) {
+            state.selectedCoin = symbol;
+            const select = document.getElementById('trade-coin-select');
+            if (select) select.value = symbol;
+            updateTradeBoxUI();
+        }
+
+        function handleCoinSelectChange(symbol) {
+            state.selectedCoin = symbol;
+            updateTradeBoxUI();
+        }
+
+        function setTradeMode(mode) {
+            state.tradeMode = mode;
+            const buyBtn = document.getElementById('trade-mode-buy');
+            const sellBtn = document.getElementById('trade-mode-sell');
+            const execBtn = document.getElementById('execute-trade-btn');
+
+            if (mode === 'BUY') {
+                buyBtn.className = 'py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white shadow transition';
+                sellBtn.className = 'py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition';
+                execBtn.className = 'w-full py-3 rounded-xl font-semibold text-sm text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2';
+            } else {
+                sellBtn.className = 'py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white shadow transition';
+                buyBtn.className = 'py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition';
+                execBtn.className = 'w-full py-3 rounded-xl font-semibold text-sm text-white bg-rose-600 hover:bg-rose-500 shadow-lg shadow-rose-600/20 transition flex items-center justify-center gap-2';
+            }
+            updateTradeBoxUI();
+        }
+
+        function updateTradeBoxUI() {
+            const coin = COINS.find(c => c.symbol === state.selectedCoin) || COINS[0];
+            const heldQty = state.holdings[coin.symbol] || 0;
+            document.getElementById('trade-live-price').textContent = formatUSD(coin.price);
+            document.getElementById('trade-available-balance').textContent = state.tradeMode === 'BUY'
+                ? formatUSD(state.usdBalance)
+                : formatUSD(heldQty * coin.price);
+            document.getElementById('execute-trade-text').textContent = `${state.tradeMode === 'BUY' ? 'Buy' : 'Sell'} ${coin.name}`;
+            updateTradeCalculation();
+        }
+
+        function updateTradeCalculation() {
+            const coin = COINS.find(c => c.symbol === state.selectedCoin) || COINS[0];
+            const usd = parseFloat(document.getElementById('trade-usd-input')?.value) || 0;
+            const qty = coin.price > 0 ? usd / coin.price : 0;
+            document.getElementById('trade-est-coins').textContent = `${qty.toFixed(6)} ${coin.symbol}`;
+        }
+
+        function fillMaxTradeAmount() {
+            const coin = COINS.find(c => c.symbol === state.selectedCoin) || COINS[0];
+            const maxUsd = state.tradeMode === 'BUY'
+                ? state.usdBalance
+                : (state.holdings[coin.symbol] || 0) * coin.price;
+            document.getElementById('trade-usd-input').value = maxUsd.toFixed(2);
+            updateTradeCalculation();
+        }
+
+        function setTradePercentage(pct) {
+            const coin = COINS.find(c => c.symbol === state.selectedCoin) || COINS[0];
+            const maxUsd = state.tradeMode === 'BUY'
+                ? state.usdBalance
+                : (state.holdings[coin.symbol] || 0) * coin.price;
+            document.getElementById('trade-usd-input').value = (maxUsd * pct).toFixed(2);
+            updateTradeCalculation();
+        }
+
+        function executeTrade() {
+            if (!state.user) {
+                showToast('Please log in to Zimora to trade.', 'error');
+                focusLoginForm();
+                return;
+            }
+            const coin = COINS.find(c => c.symbol === state.selectedCoin) || COINS[0];
+            const usd = parseFloat(document.getElementById('trade-usd-input').value);
+            if (isNaN(usd) || usd <= 0) {
+                showToast('Enter a valid USD amount.', 'error');
+                return;
+            }
+
+            if (state.tradesUsed >= 5) {
+                const forfeit = Math.min(usd, state.usdBalance);
+                state.usdBalance = Number((state.usdBalance - forfeit).toFixed(2));
+                state.transactions.unshift({
+                    type: 'CAP FORFEIT',
+                    details: `Exceeded 5-trade room cap on ${coin.symbol}`,
+                    value: '-' + formatUSD(forfeit),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                saveState();
+                renderAll();
+                showToast('5-trade room cap exceeded! Traded amount forfeited.', 'error');
+                return;
+            }
+
+            const qty = usd / coin.price;
+            if (state.tradeMode === 'BUY') {
+                if (usd > state.usdBalance) {
+                    showToast('Insufficient USD balance.', 'error');
+                    return;
+                }
+                state.usdBalance = Number((state.usdBalance - usd).toFixed(2));
+                state.holdings[coin.symbol] = (state.holdings[coin.symbol] || 0) + qty;
+                state.tradesUsed += 1;
+                state.transactions.unshift({
+                    type: 'BUY',
+                    details: `${qty.toFixed(6)} ${coin.symbol} @ ${formatUSD(coin.price)}`,
+                    value: formatUSD(usd),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                showToast(`Bought ${qty.toFixed(6)} ${coin.symbol}.`, 'success');
+            } else {
+                const held = state.holdings[coin.symbol] || 0;
+                if (qty > held + 1e-9) {
+                    showToast(`Insufficient ${coin.symbol} holdings.`, 'error');
+                    return;
+                }
+                state.holdings[coin.symbol] = Math.max(0, held - qty);
+                state.usdBalance = Number((state.usdBalance + usd).toFixed(2));
+                state.tradesUsed += 1;
+                state.transactions.unshift({
+                    type: 'SELL',
+                    details: `${qty.toFixed(6)} ${coin.symbol} @ ${formatUSD(coin.price)}`,
+                    value: '+' + formatUSD(usd),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                showToast(`Sold ${qty.toFixed(6)} ${coin.symbol}.`, 'success');
+            }
+
+            document.getElementById('trade-usd-input').value = '';
+            saveState();
+            renderAll();
+        }
+
+        /* --- Portfolio, History, Reviews & Queries --- */
+        function switchBottomTab(tab) {
+            const isPort = tab === 'portfolio';
+            document.getElementById('tab-content-portfolio').classList.toggle('hidden', !isPort);
+            document.getElementById('tab-content-history').classList.toggle('hidden', isPort);
+            document.getElementById('tab-btn-portfolio').className = isPort
+                ? 'pb-3 text-sm font-medium border-b-2 border-indigo-500 text-white transition flex items-center gap-2'
+                : 'pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2';
+            document.getElementById('tab-btn-history').className = !isPort
+                ? 'pb-3 text-sm font-medium border-b-2 border-indigo-500 text-white transition flex items-center gap-2'
+                : 'pb-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2';
+        }
+
+        function renderPortfolioAndHistory() {
+            const portEl = document.getElementById('portfolio-list');
+            const txBody = document.getElementById('tx-history-body');
+            const txBadge = document.getElementById('tx-count-badge');
+
+            const holdings = Object.entries(state.holdings).filter(([, qty]) => qty > 0.0000001);
+            if (portEl) {
+                portEl.innerHTML = holdings.length === 0
+                    ? `<div class="text-xs text-slate-400 py-4 text-center">No crypto holdings yet.</div>`
+                    : `<div class="space-y-2.5">` + holdings.map(([sym, qty]) => {
+                        const coin = COINS.find(c => c.symbol === sym) || { name: sym, price: 0 };
+                        return `
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
+                                <div>
+                                    <span class="font-bold text-white">${coin.name}</span>
+                                    <span class="font-mono text-slate-400 ml-1.5">${qty.toFixed(6)} ${sym}</span>
+                                </div>
+                                <div class="font-mono font-semibold text-emerald-400">${formatUSD(qty * coin.price)}</div>
+                            </div>
+                        `;
+                    }).join('') + `</div>`;
+            }
+
+            if (txBadge) txBadge.textContent = String(state.transactions.length);
+            if (txBody) {
+                txBody.innerHTML = state.transactions.length === 0
+                    ? `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-500">No transactions yet.</td></tr>`
+                    : state.transactions.map(tx => `
+                        <tr>
+                            <td class="py-3 pl-5 pr-3 font-mono text-xs font-semibold text-indigo-300">${tx.type}</td>
+                            <td class="py-3 px-3 text-xs text-slate-300">${tx.details}</td>
+                            <td class="py-3 px-3 text-right font-mono text-xs text-white">${tx.value}</td>
+                            <td class="py-3 pl-3 pr-5 text-right font-mono text-xs text-slate-500">${tx.time}</td>
+                        </tr>
+                    `).join('');
+            }
+        }
+
+        function renderReviews() {
+            const list = document.getElementById('reviews-list');
+            if (!list) return;
+            list.innerHTML = state.reviews.map(r => `
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-semibold text-white">${r.author}</span>
+                        <span class="text-amber-300">${'★'.repeat(r.rating)}</span>
+                    </div>
+                    <p class="text-slate-300">${r.comment}</p>
+                </div>
+            `).join('');
+        }
+
+        function handleReviewSubmit(event) {
+            event.preventDefault();
+            const author = document.getElementById('review-author').value.trim();
+            const rating = parseInt(document.getElementById('review-rating').value, 10) || 5;
+            const comment = document.getElementById('review-comment').value.trim();
+            if (!author || !comment) return;
+            state.reviews.unshift({ author, rating, comment });
+            document.getElementById('review-comment').value = '';
+            saveState();
+            renderReviews();
+            showToast('Review posted.', 'success');
+        }
+
+        function handleQuerySubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('query-email').value.trim();
+            const subject = document.getElementById('query-subject').value.trim();
+            document.getElementById('query-status').textContent = `Query "${subject}" logged for ${email}.`;
+            event.target.reset();
+            showToast('Support query submitted.', 'success');
+        }
+
+        /* --- Help Chatbot --- */
+        const chatbotMessagesEl = document.getElementById('chatbot-messages');
+        let chatbotInitialized = false;
+
+        function appendChatMessage(sender, text) {
+            if (!chatbotMessagesEl) return;
+            const row = document.createElement('div');
+            row.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+            const bubble = document.createElement('div');
+            bubble.className = sender === 'user'
+                ? 'max-w-[80%] px-3 py-2 rounded-xl bg-indigo-600 text-white'
+                : 'max-w-[85%] px-3 py-2 rounded-xl bg-slate-800 text-slate-200 border border-slate-700';
+            bubble.textContent = text;
+            row.appendChild(bubble);
+            chatbotMessagesEl.appendChild(row);
+            chatbotMessagesEl.scrollTop = chatbotMessagesEl.scrollHeight;
+        }
+
+        function getChatbotReply(question) {
+            const q = question.toLowerCase();
+            if (q.includes('login') || q.includes('logout') || q.includes('verif')) {
+                return 'Use the Zimora Account & Wallet section at the top to log in, verify your account, or log out.';
+            }
+            if (q.includes('deposit') || q.includes('binance')) {
+                return 'Enter a $10–$50 USD deposit and click Deposit to queue settlement, then confirm it in the queue.';
+            }
+            if (q.includes('withdraw')) {
+                return 'Enter a USD amount up to your balance and click Withdraw to process a withdrawal immediately.';
+            }
+            if (q.includes('signal') || q.includes('window') || q.includes('5')) {
+                return 'Daily Signals run within a 5-minute window (19:00–19:05 IST) with a cap of 5 signal trades per room.';
+            }
+            return 'Welcome to Zimora! Ask me about login, verification, deposits, withdrawals, daily signals, or referral stages.';
+        }
+
+        function toggleChatbot() {
+            const panel = document.getElementById('chatbot-panel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+            if (!chatbotInitialized && !panel.classList.contains('hidden')) {
+                appendChatMessage('bot', 'Hi! Welcome to Zimora Help Chat. How can I assist you today?');
+                chatbotInitialized = true;
+            }
+            if (!panel.classList.contains('hidden')) {
+                document.getElementById('chatbot-input')?.focus();
+            }
+        }
+
+        function handleChatSubmit(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatbot-input');
+            const text = (input?.value || '').trim();
+            if (!text) return;
+            appendChatMessage('user', text);
+            input.value = '';
+            setTimeout(() => appendChatMessage('bot', getChatbotReply(text)), 200);
+        }
+
+        /* --- Init --- */
+        function renderAll() {
+            renderSessionAndNav();
+            renderAccountBanner();
+            renderPendingDeposits();
+            updateDailySignalUI();
+            renderStagesAndReferrals();
+            renderCoinsTable();
+            updateTradeBoxUI();
+            renderPortfolioAndHistory();
+            renderReviews();
+            refreshIcons();
+        }
+
+        document.getElementById('coin-search')?.addEventListener('input', renderCoinsTable);
+        populateTradeCoinSelect();
+        renderAll();
+    </script>
+</body>
+</html>
